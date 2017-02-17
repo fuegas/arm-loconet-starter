@@ -9,6 +9,15 @@
  * @author Jan Martijn van der Werf <janmartijn@slashdev.nl>
  */
 
+// ----------------------------------------------------------------------------
+// Defines the total number of CV values possible in the project, if not
+// already defined. The CV number range is defined by
+// 0 <= LNCV < LOCONET_CV_NUMBERS.
+
+#ifndef LOCONET_CV_NUMBERS
+  #define LOCONET_CV_NUMBERS          0x1E  // 30
+#endif
+
 #ifndef _LOCONET_LOCONET_CV_H_
 #define _LOCONET_LOCONET_CV_H_
 
@@ -19,7 +28,6 @@
 #include "utils/eeprom.h"
 #include "utils/status_codes.h"
 
-#define LOCONET_CV_NUMBERS          0x1E  // 30
 #define LOCONET_CV_PER_PAGE         0x1E  // 30
 #define LOCONET_CV_PAGE_SIZE        (EEPROM_PAGE_SIZE / 2)
 // /Dev device class: 12100 (/D)
