@@ -13,7 +13,6 @@
 // Defines the total number of CV values possible in the project, if not
 // already defined. The CV number range is defined by
 // 0 <= LNCV < LOCONET_CV_NUMBERS.
-
 #ifndef LOCONET_CV_NUMBERS
   #define LOCONET_CV_NUMBERS          0x1E  // 30
 #endif
