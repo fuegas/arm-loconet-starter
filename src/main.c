@@ -88,9 +88,9 @@ static void eeprom_init(void)
   }
 }
 
-//-----------------------------------------------------------------------------
-int main(void)
+static inline void initialize(void)
 {
+  // System
   sys_init();
   eeprom_init();
   // Set LED GPIO as output
@@ -98,12 +98,16 @@ int main(void)
   // Turn on the LED
   HAL_GPIO_LED_set();
 
-  // Initialize CVs for loconet
+  // Core
   loconet_cv_init();
-
-
-  // Initialize loconet
   loconet_init();
+}
+
+//-----------------------------------------------------------------------------
+int main(void)
+{
+  // Initialize
+  initialize();
 
   while (1) {
     loconet_loop();
