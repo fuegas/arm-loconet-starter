@@ -37,6 +37,7 @@
 #include "loconet/loconet.h"
 #include "loconet/loconet_cv.h"
 #include "utils/eeprom.h"
+#include "utils/logger.h"
 
 //-----------------------------------------------------------------------------
 HAL_GPIO_PIN(LED, A, 12);
@@ -98,6 +99,7 @@ static inline void initialize(void)
   HAL_GPIO_LED_out();
   // Turn on the LED
   HAL_GPIO_LED_set();
+  logger_init(LOGGER_BAUDRATE);
 
   // Core
   loconet_cv_init();
