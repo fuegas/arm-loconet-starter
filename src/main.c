@@ -33,6 +33,7 @@
 #include <string.h>
 #include "samd20.h"
 #include "hal_gpio.h"
+#include "components/fast_clock.h"
 #include "loconet/loconet.h"
 #include "loconet/loconet_cv.h"
 #include "utils/eeprom.h"
@@ -101,6 +102,9 @@ static inline void initialize(void)
   // Core
   loconet_cv_init();
   loconet_init();
+
+  // Components
+  fast_clock_init();
 }
 
 //-----------------------------------------------------------------------------
