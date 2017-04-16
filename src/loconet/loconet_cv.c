@@ -11,7 +11,6 @@
 
 #include "loconet_cv.h"
 
-uint16_t lncv_address;
 bool loconet_cv_programming;
 
 //-----------------------------------------------------------------------------
@@ -85,7 +84,7 @@ static void loconet_cv_prog_on(LOCONET_CV_MSG_Type *msg)
 {
   // lncv_number should be 0, and lncv_value should be 0xFFFF
   // or the address of the device.
-  if (msg->lncv_number != 0 || (msg->lncv_value != 0xFFFF && msg->lncv_value != lncv_address)) {
+  if (msg->lncv_number != 0 || (msg->lncv_value != 0xFFFF && msg->lncv_value != loconet_config.bit.ADDRESS)) {
     return;
   }
 
@@ -190,7 +189,7 @@ uint8_t loconet_cv_set(uint16_t lncv_number, uint16_t lncv_value)
       // Set magic value to detect we have configured the address.
       page_data[1] = LOCONET_CV_DEVICE_CLASS;
       // Change lncv_address
-      lncv_address = lncv_value;
+      loconet_config.bit.ADDRESS = lncv_value;
     }
     eeprom_emulator_write_page(page, (uint8_t *)page_data);
     eeprom_emulator_commit_page_buffer();
@@ -209,8 +208,9 @@ enum status_code loconet_cv_init(void)
     return STATUS_ERR_NOT_INITIALIZED;
   }
 
-  // Get address from Eeprom
-  lncv_address = loconet_cv_get(0);
+  // Get address and priority from Eeprom
+  loconet_config.bit.ADDRESS = loconet_cv_get(0);
+  loconet_config.bit.PRIORITY = loconet_cv_get(2);
 
   // Disable programming on init
   loconet_cv_programming = false;
