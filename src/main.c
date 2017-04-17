@@ -40,7 +40,6 @@
 #include "utils/logger.h"
 
 //-----------------------------------------------------------------------------
-HAL_GPIO_PIN(LED, A, 12);
 
 //-----------------------------------------------------------------------------
 void irq_handler_eic(void);
@@ -95,10 +94,6 @@ static inline void initialize(void)
   // System
   sys_init();
   eeprom_init();
-  // Set LED GPIO as output
-  HAL_GPIO_LED_out();
-  // Turn on the LED
-  HAL_GPIO_LED_set();
   logger_init(LOGGER_BAUDRATE);
 
   // Core
