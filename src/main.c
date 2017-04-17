@@ -117,6 +117,7 @@ int main(void)
 
   while (1) {
     loconet_loop();
+    fast_clock_loop();
   }
   return 0;
 }
