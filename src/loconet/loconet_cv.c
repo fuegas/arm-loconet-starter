@@ -190,6 +190,8 @@ uint8_t loconet_cv_set(uint16_t lncv_number, uint16_t lncv_value)
       page_data[1] = LOCONET_CV_DEVICE_CLASS;
       // Change lncv_address
       loconet_config.bit.ADDRESS = lncv_value;
+    } else if (lncv_number == 2) {
+      loconet_config.bit.PRIORITY = lncv_value;
     }
     eeprom_emulator_write_page(page, (uint8_t *)page_data);
     eeprom_emulator_commit_page_buffer();
