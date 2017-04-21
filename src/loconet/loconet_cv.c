@@ -11,7 +11,6 @@
 
 #include "loconet_cv.h"
 
-uint16_t lncv_address;
 bool loconet_cv_programming;
 
 //-----------------------------------------------------------------------------
@@ -45,6 +44,22 @@ void loconet_cv_written_event_dummy(uint16_t lncv_number, uint16_t value)
 
 __attribute__ ((weak, alias ("loconet_cv_written_event_dummy"))) \
   void loconet_cv_written_event(uint16_t, uint16_t);
+
+//-----------------------------------------------------------------------------
+uint8_t loconet_cv_write_allowed_core(uint16_t, uint16_t);
+uint8_t loconet_cv_write_allowed_core(uint16_t lncv_number, uint16_t lncv_value)
+{
+  switch (lncv_number) {
+    case 0:
+      return (lncv_value < 0x3FF) ? LOCONET_CV_ACK_OK : LOCONET_CV_ACK_ERROR_OUTOFRANGE;
+    case 1:
+      return LOCONET_CV_ACK_ERROR_READONLY;
+    case 2:
+      return (lncv_value > 0 && lncv_value < 0x010) ? LOCONET_CV_ACK_OK : LOCONET_CV_ACK_ERROR_OUTOFRANGE;
+    default:
+      return loconet_cv_write_allowed(lncv_number, lncv_value);
+  }
+}
 
 //-----------------------------------------------------------------------------
 static void loconet_cv_response(LOCONET_CV_MSG_Type *msg)
@@ -85,7 +100,7 @@ static void loconet_cv_prog_on(LOCONET_CV_MSG_Type *msg)
 {
   // lncv_number should be 0, and lncv_value should be 0xFFFF
   // or the address of the device.
-  if (msg->lncv_number != 0 || (msg->lncv_value != 0xFFFF && msg->lncv_value != lncv_address)) {
+  if (msg->lncv_number != 0 || (msg->lncv_value != 0xFFFF && msg->lncv_value != loconet_config.bit.ADDRESS)) {
     return;
   }
 
@@ -175,7 +190,7 @@ uint8_t loconet_cv_set(uint16_t lncv_number, uint16_t lncv_value)
   }
 
   // Is this write allowed?
-  uint8_t ack = loconet_cv_write_allowed(lncv_number, lncv_value);
+  uint8_t ack = loconet_cv_write_allowed_core(lncv_number, lncv_value);
 
   uint8_t page = lncv_number / LOCONET_CV_PER_PAGE;
   uint8_t index = lncv_number % LOCONET_CV_PER_PAGE;
@@ -190,7 +205,9 @@ uint8_t loconet_cv_set(uint16_t lncv_number, uint16_t lncv_value)
       // Set magic value to detect we have configured the address.
       page_data[1] = LOCONET_CV_DEVICE_CLASS;
       // Change lncv_address
-      lncv_address = lncv_value;
+      loconet_config.bit.ADDRESS = lncv_value;
+    } else if (lncv_number == 2) {
+      loconet_config.bit.PRIORITY = lncv_value;
     }
     eeprom_emulator_write_page(page, (uint8_t *)page_data);
     eeprom_emulator_commit_page_buffer();
@@ -209,8 +226,9 @@ enum status_code loconet_cv_init(void)
     return STATUS_ERR_NOT_INITIALIZED;
   }
 
-  // Get address from Eeprom
-  lncv_address = loconet_cv_get(0);
+  // Get address and priority from Eeprom
+  loconet_config.bit.ADDRESS = loconet_cv_get(0);
+  loconet_config.bit.PRIORITY = loconet_cv_get(2);
 
   // Disable programming on init
   loconet_cv_programming = false;

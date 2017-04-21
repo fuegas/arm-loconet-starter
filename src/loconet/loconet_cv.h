@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "loconet.h"
 #include "loconet_tx.h"
 #include "loconet_tx_messages.h"
 #include "utils/eeprom.h"

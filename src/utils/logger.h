@@ -27,6 +27,11 @@
 #ifndef _UTILS_LOGGER_H_
 #define _UTILS_LOGGER_H_
 
+// Default logger baudrate
+#ifndef LOGGER_BAUDRATE
+#define LOGGER_BAUDRATE 115200
+#endif
+
 // Do we want logging?
 #ifdef UTILS_LOGGER
 

@@ -33,12 +33,13 @@
 #include <string.h>
 #include "samd20.h"
 #include "hal_gpio.h"
+#include "components/fast_clock.h"
 #include "loconet/loconet.h"
 #include "loconet/loconet_cv.h"
 #include "utils/eeprom.h"
+#include "utils/logger.h"
 
 //-----------------------------------------------------------------------------
-HAL_GPIO_PIN(LED, A, 12);
 
 //-----------------------------------------------------------------------------
 void irq_handler_eic(void);
@@ -88,28 +89,30 @@ static void eeprom_init(void)
   }
 }
 
+static inline void initialize(void)
+{
+  // System
+  sys_init();
+  eeprom_init();
+  logger_init(LOGGER_BAUDRATE);
+
+  // Core
+  loconet_cv_init();
+  loconet_init();
+
+  // Components
+  fast_clock_init();
+}
+
 //-----------------------------------------------------------------------------
 int main(void)
 {
-  sys_init();
-  eeprom_init();
-  // Set LED GPIO as output
-  HAL_GPIO_LED_out();
-  // Turn on the LED
-  HAL_GPIO_LED_set();
-
-  // Initialize CVs for loconet
-  loconet_cv_init();
-
-  // Set loconet basics
-  loconet_config.bit.ADDRESS = loconet_cv_get(0);
-  loconet_config.bit.PRIORITY = loconet_cv_get(2);
-
-  // Initialize loconet
-  loconet_init();
+  // Initialize
+  initialize();
 
   while (1) {
     loconet_loop();
+    fast_clock_loop();
   }
   return 0;
 }

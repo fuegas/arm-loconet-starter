@@ -10,6 +10,9 @@
 
 #include "fast_clock.h"
 
+// Do we want this component?
+#ifdef COMPONENTS_FAST_CLOCK
+
 // ----------------------------------------------------------------------------
 // Prototypes
 void fast_clock_handle_update_dummy(FAST_CLOCK_TIME_Type time);
@@ -260,3 +263,5 @@ void fast_clock_handle_update_dummy(FAST_CLOCK_TIME_Type time)
 {
   (void) time;
 }
+
+#endif // COMPONENTS_FAST_CLOCK

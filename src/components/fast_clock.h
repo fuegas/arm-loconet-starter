@@ -51,6 +51,9 @@
 #ifndef _LOCONET_FAST_CLOCK_H_
 #define _LOCONET_FAST_CLOCK_H_
 
+// Do we want this component?
+#ifdef COMPONENTS_FAST_CLOCK
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "loconet/loconet_tx_messages.h"
@@ -129,5 +132,22 @@ extern void fast_clock_init_timer(Tc*, uint32_t, uint32_t, uint32_t);
 // ------------------------------------------------------------------
 // Reacts on the fast clock messages to update the internal clock.
 extern void loconet_rx_fast_clock(uint8_t *data, uint8_t length);
+
+#else // COMPONENTS_FAST_CLOCK
+
+#define fast_clock_set_master(...) do {} while(0)
+#define fast_clock_set_slave(...) do {} while(0)
+#define fast_clock_set_rate(...) do {} while(0)
+#define fast_clock_set_time(...) do {} while(0)
+#define fast_clock_get_time(...) do {} while(0)
+#define fast_clock_get_time_as_int(...) do {} while(0)
+#define fast_clock_irq(...) do {} while(0)
+#define fast_clock_loop(...) do {} while(0)
+#define fast_clock_init(...) do {} while(0)
+#define fast_clock_init_timer(...) do {} while(0)
+#define FAST_CLOCK_BUILD(...)
+#define loconet_rx_fast_clock(...) do {} while(0)
+
+#endif // COMPONENTS_FAST_CLOCK
 
 #endif // _LOCONET_FAST_CLOCK_H_
