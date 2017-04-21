@@ -46,7 +46,9 @@ LOCONET_BUILD(
   0,          /* sercom */
   A, 4,       /* tx: port, pin */
   A, 5, 1,    /* rx: port, pin, pad */
-  A, 6, 6, 0  /* flank: port, pin, interrupt, timer */
+  A, 6, 6, 0, /* flank: port, pin, interrupt, timer */
+  A, 27,      /* tx led */
+  A, 28       /* rx led */
 );
 
 //-----------------------------------------------------------------------------
