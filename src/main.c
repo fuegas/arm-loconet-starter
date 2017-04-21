@@ -63,6 +63,19 @@ LOGGER_BUILD(
 
 
 //-----------------------------------------------------------------------------
+void irq_handler_hard_fault(void);
+void irq_handler_hard_fault()
+{
+  logger_newline();
+  logger_string("Tx queue size: ");
+  logger_number(loconet_tx_queue_size());
+  logger_newline();
+  logger_string("HARD FAULT");
+  logger_error();
+  while(1);
+}
+
+//-----------------------------------------------------------------------------
 void irq_handler_eic(void);
 void irq_handler_eic(void) {
   if (loconet_handle_eic()) {
