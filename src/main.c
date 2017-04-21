@@ -40,6 +40,42 @@
 #include "utils/logger.h"
 
 //-----------------------------------------------------------------------------
+// Loconet: Tx: PA14, Rx: PA15, Flank: PA13, Flank timer:
+LOCONET_BUILD(
+  D,          /* pmux */
+  0,          /* sercom */
+  A, 4,       /* tx: port, pin */
+  A, 5, 1,    /* rx: port, pin, pad */
+  A, 6, 6, 0, /* flank: port, pin, interrupt, timer */
+  A, 27,      /* tx led */
+  A, 28       /* rx led */
+);
+
+//-----------------------------------------------------------------------------
+FAST_CLOCK_BUILD(1);
+
+//-----------------------------------------------------------------------------
+// Logger Tx: PB22, Rx: PB23
+LOGGER_BUILD(
+  D,        /* pmux */
+  5,        /* sercom */
+  B, 22,    /* Tx: port, pin */
+  B, 23, 3  /* Rx: port, pin, pad */
+);
+
+
+//-----------------------------------------------------------------------------
+void irq_handler_hard_fault(void);
+void irq_handler_hard_fault()
+{
+  logger_newline();
+  logger_string("Tx queue size: ");
+  logger_number(loconet_tx_queue_size());
+  logger_newline();
+  logger_string("HARD FAULT");
+  logger_error();
+  while(1);
+}
 
 //-----------------------------------------------------------------------------
 void irq_handler_eic(void);

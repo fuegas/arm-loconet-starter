@@ -55,7 +55,7 @@ void loconet_init_usart(Sercom *sercom, uint32_t pm_mask, uint32_t gclock_id, ui
     SERCOM_USART_CTRLA_DORD
     | SERCOM_USART_CTRLA_MODE_USART_INT_CLK
     | SERCOM_USART_CTRLA_RXPO(rx_pad)
-    | SERCOM_USART_CTRLA_TXPO;
+    | SERCOM_USART_CTRLA_TXPO_PAD0;
 
   /* CTRLB register:
    *   RXEN:      0x01  Enable Rx
