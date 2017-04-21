@@ -40,6 +40,15 @@
 #include "utils/logger.h"
 
 //-----------------------------------------------------------------------------
+// Loconet: Tx: PA14, Rx: PA15, Flank: PA13, Flank timer:
+LOCONET_BUILD(
+  D,          /* pmux */
+  0,          /* sercom */
+  A, 4,       /* tx: port, pin */
+  A, 5, 1,    /* rx: port, pin, pad */
+  A, 6, 6, 0  /* flank: port, pin, interrupt, timer */
+);
+
 
 //-----------------------------------------------------------------------------
 void irq_handler_eic(void);

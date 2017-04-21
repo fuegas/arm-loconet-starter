@@ -9,7 +9,8 @@
  * To build `loconet_init` you call `LOCONET_BUILD` with the
  * parameters how you want use the SERCOM interface. The
  * `LOCONET_BUILD` is structured as follows:
- * LOCONET_BUILD(sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad)
+ * LOCONET_BUILD(pmux, sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad)
+ * - pmux:    the PMUX channel you'd like to use (e.g. C)
  * - sercom:  the SERCOM interface number you'd like to use (e.g. 3)
  * - tx_port: the PORT of the TX output (e.g. A)
  * - tx_pin:  the PIN of the TX output (e.g. 14)
