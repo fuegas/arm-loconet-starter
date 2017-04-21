@@ -150,7 +150,7 @@ extern void loconet_sercom_enable_dre_irq(void);
 extern uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length);
 
 // Macro for loconet_init and irq_handler_sercom<nr>
-#define LOCONET_BUILD(sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad, fl_port, fl_pin, fl_int, fl_tmr) \
+#define LOCONET_BUILD(pmux, sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad, fl_port, fl_pin, fl_int, fl_tmr) \
   HAL_GPIO_PIN(LOCONET_TX, tx_port, tx_pin);                                  \
   HAL_GPIO_PIN(LOCONET_RX, rx_port, rx_pin);                                  \
   HAL_GPIO_PIN(LOCONET_FL, fl_port, fl_pin);                                  \
@@ -161,11 +161,11 @@ extern uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length);
     loconet_status.reg |= LOCONET_STATUS_BUSY;                                \
     /* Set Tx pin as output */                                                \
     HAL_GPIO_LOCONET_TX_out();                                                \
-    HAL_GPIO_LOCONET_TX_pmuxen(PORT_PMUX_PMUXE_C_Val);                        \
+    HAL_GPIO_LOCONET_TX_pmuxen(PORT_PMUX_PMUXE_##pmux##_Val);                 \
     HAL_GPIO_LOCONET_TX_clr();                                                \
     /* Set Rx pin as input */                                                 \
     HAL_GPIO_LOCONET_RX_in();                                                 \
-    HAL_GPIO_LOCONET_RX_pmuxen(PORT_PMUX_PMUXE_C_Val);                        \
+    HAL_GPIO_LOCONET_RX_pmuxen(PORT_PMUX_PMUXE_##pmux##_Val);                 \
     /* Set Fl pin as input */                                                 \
     HAL_GPIO_LOCONET_FL_in();                                                 \
     HAL_GPIO_LOCONET_FL_pullup();                                             \
