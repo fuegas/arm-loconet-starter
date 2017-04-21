@@ -9,7 +9,8 @@
  * To build `loconet_init` you call `LOCONET_BUILD` with the
  * parameters how you want use the SERCOM interface. The
  * `LOCONET_BUILD` is structured as follows:
- * LOCONET_BUILD(sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad)
+ * LOCONET_BUILD(pmux, sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad)
+ * - pmux:    the PMUX channel you'd like to use (e.g. C)
  * - sercom:  the SERCOM interface number you'd like to use (e.g. 3)
  * - tx_port: the PORT of the TX output (e.g. A)
  * - tx_pin:  the PIN of the TX output (e.g. 14)
@@ -22,6 +23,10 @@
  * - fl_int:  the external interrupt associated to fl_pin
  *     (e.g. 1, see datasheet)
  * - fl_tmr:  the TIMER used for Carrier and Break detection
+ * - tx_led_port: the PORT of the TX LED
+ * - tx_led_pin:  the PIN of the TX LED
+ * - rx_led_port: the PORT of the RX LED
+ * - rx_led_pin:  the PIN of the RX LED
  *
  * Loconet uses CSMA/CD techniques to arbitrage and control network
  * access. The bit times are 60 uSecs or 16.66 KBaud +/- 1.5%. This
@@ -32,6 +37,8 @@
  * Flank detection is used to start the delays for carrier detect
  * and break detect. The current code assumes the chip to run with
  * F_CPU 8 MHz.
+ *
+ * The LEDs for Tx and Rx will light up if a message is being sent or received.
  *
  * Before you can use the logger functions, initialize the logger
  * using `logger_init(baudrate);`.
@@ -102,7 +109,7 @@ extern LOCONET_CONFIG_Type loconet_config;
 //-----------------------------------------------------------------------------
 typedef union {
   struct {
-    uint8_t IDLE:1;
+    uint8_t BUSY:1;
     uint8_t TRANSMIT:1;
     uint8_t COLLISION_DETECTED:1;
     uint8_t :5;
@@ -110,8 +117,8 @@ typedef union {
   uint8_t reg;
 } LOCONET_STATUS_Type;
 
-#define LOCONET_STATUS_IDLE_Pos 0
-#define LOCONET_STATUS_IDLE (0x01ul << LOCONET_STATUS_IDLE_Pos)
+#define LOCONET_STATUS_BUSY_Pos 0
+#define LOCONET_STATUS_BUSY (0x01ul << LOCONET_STATUS_BUSY_Pos)
 #define LOCONET_STATUS_TRANSMIT_Pos 1
 #define LOCONET_STATUS_TRANSMIT (0x01ul << LOCONET_STATUS_TRANSMIT_Pos)
 #define LOCONET_STATUS_COLLISION_DETECT_Pos 2
@@ -139,6 +146,13 @@ extern void loconet_irq_sercom(void);
 extern uint8_t loconet_handle_eic(void);
 
 //-----------------------------------------------------------------------------
+// Loconet Tx and Rx LED control
+extern void loconet_tx_led_on(void);
+extern void loconet_tx_led_off(void);
+extern void loconet_rx_led_on(void);
+extern void loconet_rx_led_off(void);
+
+//-----------------------------------------------------------------------------
 // Loconet loop to be used in the main loop
 // Handles processing and sending of messages
 extern void loconet_loop(void);
@@ -150,24 +164,31 @@ extern void loconet_sercom_enable_dre_irq(void);
 extern uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length);
 
 // Macro for loconet_init and irq_handler_sercom<nr>
-#define LOCONET_BUILD(sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad, fl_port, fl_pin, fl_int, fl_tmr) \
+#define LOCONET_BUILD(pmux, sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad, fl_port, fl_pin, fl_int, fl_tmr, tx_led_port, tx_led_pin, rx_led_port, rx_led_pin) \
   HAL_GPIO_PIN(LOCONET_TX, tx_port, tx_pin);                                  \
   HAL_GPIO_PIN(LOCONET_RX, rx_port, rx_pin);                                  \
   HAL_GPIO_PIN(LOCONET_FL, fl_port, fl_pin);                                  \
+  HAL_GPIO_PIN(LOCONET_LED_TX, tx_led_port, tx_led_pin);                      \
+  HAL_GPIO_PIN(LOCONET_LED_RX, rx_led_port, rx_led_pin);                      \
                                                                               \
   void loconet_init()                                                         \
   {                                                                           \
+    /* Mark loconet as busy */                                                \
+    loconet_status.reg |= LOCONET_STATUS_BUSY;                                \
     /* Set Tx pin as output */                                                \
     HAL_GPIO_LOCONET_TX_out();                                                \
-    HAL_GPIO_LOCONET_TX_pmuxen(PORT_PMUX_PMUXE_C_Val);                        \
+    HAL_GPIO_LOCONET_TX_pmuxen(PORT_PMUX_PMUXE_##pmux##_Val);                 \
     HAL_GPIO_LOCONET_TX_clr();                                                \
     /* Set Rx pin as input */                                                 \
     HAL_GPIO_LOCONET_RX_in();                                                 \
-    HAL_GPIO_LOCONET_RX_pmuxen(PORT_PMUX_PMUXE_C_Val);                        \
+    HAL_GPIO_LOCONET_RX_pmuxen(PORT_PMUX_PMUXE_##pmux##_Val);                 \
     /* Set Fl pin as input */                                                 \
     HAL_GPIO_LOCONET_FL_in();                                                 \
     HAL_GPIO_LOCONET_FL_pullup();                                             \
     HAL_GPIO_LOCONET_FL_pmuxen(PORT_PMUX_PMUXE_A_Val);                        \
+    /* Set Tx and Rx LED as output */                                         \
+    HAL_GPIO_LOCONET_LED_TX_out();                                            \
+    HAL_GPIO_LOCONET_LED_RX_out();                                            \
     /* Initialize usart */                                                    \
     loconet_init_usart(                                                       \
       SERCOM##sercom,                                                         \
@@ -223,6 +244,22 @@ extern uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length);
   void irq_handler_sercom##sercom(void)                                       \
   {                                                                           \
     loconet_irq_sercom();                                                     \
+  }                                                                           \
+  void loconet_tx_led_on(void)                                                \
+  {                                                                           \
+    HAL_GPIO_LOCONET_LED_TX_set();                                            \
+  }                                                                           \
+  void loconet_tx_led_off(void)                                               \
+  {                                                                           \
+    HAL_GPIO_LOCONET_LED_TX_clr();                                            \
+  }                                                                           \
+  void loconet_rx_led_on(void)                                                \
+  {                                                                           \
+    HAL_GPIO_LOCONET_LED_RX_set();                                            \
+  }                                                                           \
+  void loconet_rx_led_off(void)                                               \
+  {                                                                           \
+    HAL_GPIO_LOCONET_LED_RX_clr();                                            \
   }                                                                           \
 
 #endif // _LOCONET_LOCONET_H_

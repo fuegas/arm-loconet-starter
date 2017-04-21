@@ -10,6 +10,7 @@
  * you want use the SERCOM interface. The `LOGGER_BUILD` is
  * structured as follows:
  * LOGGER_BUILD(sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad)
+ * - pmux:    the PMUX channel you'd like to use (e.g. C)
  * - sercom:  the SERCOM interface number you'd like to use (e.g. 3)
  * - tx_port: the PORT of the TX output (e.g. A)
  * - tx_pin:  the PIN of the TX output (e.g. 14)
@@ -27,12 +28,17 @@
 #ifndef _UTILS_LOGGER_H_
 #define _UTILS_LOGGER_H_
 
+// Default logger baudrate
+#ifndef LOGGER_BAUDRATE
+#define LOGGER_BAUDRATE 115200
+#endif
+
 // Do we want logging?
 #ifdef UTILS_LOGGER
 
 #include <stdint.h>
 
-#define LOGGER_BUILD(sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad) \
+#define LOGGER_BUILD(pmux, sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad) \
   HAL_GPIO_PIN(LOGGER_TX, tx_port, tx_pin); \
   HAL_GPIO_PIN(LOGGER_RX, rx_port, rx_pin); \
   \
@@ -46,10 +52,10 @@
   { \
     /* Set TX as output */ \
     HAL_GPIO_LOGGER_TX_out(); \
-    HAL_GPIO_LOGGER_TX_pmuxen(PORT_PMUX_PMUXE_C_Val); \
+    HAL_GPIO_LOGGER_TX_pmuxen(PORT_PMUX_PMUXE_##pmux##_Val); \
     /* Set RX as input */ \
     HAL_GPIO_LOGGER_RX_in(); \
-    HAL_GPIO_LOGGER_RX_pmuxen(PORT_PMUX_PMUXE_C_Val); \
+    HAL_GPIO_LOGGER_RX_pmuxen(PORT_PMUX_PMUXE_##pmux##_Val); \
     \
     /* Enable clock for peripheral, without prescaler */ \
     PM->APBCMASK.reg |= PM_APBCMASK_SERCOM##sercom; \
