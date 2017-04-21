@@ -102,7 +102,7 @@ extern LOCONET_CONFIG_Type loconet_config;
 //-----------------------------------------------------------------------------
 typedef union {
   struct {
-    uint8_t IDLE:1;
+    uint8_t BUSY:1;
     uint8_t TRANSMIT:1;
     uint8_t COLLISION_DETECTED:1;
     uint8_t :5;
@@ -110,8 +110,8 @@ typedef union {
   uint8_t reg;
 } LOCONET_STATUS_Type;
 
-#define LOCONET_STATUS_IDLE_Pos 0
-#define LOCONET_STATUS_IDLE (0x01ul << LOCONET_STATUS_IDLE_Pos)
+#define LOCONET_STATUS_BUSY_Pos 0
+#define LOCONET_STATUS_BUSY (0x01ul << LOCONET_STATUS_BUSY_Pos)
 #define LOCONET_STATUS_TRANSMIT_Pos 1
 #define LOCONET_STATUS_TRANSMIT (0x01ul << LOCONET_STATUS_TRANSMIT_Pos)
 #define LOCONET_STATUS_COLLISION_DETECT_Pos 2
@@ -157,6 +157,8 @@ extern uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length);
                                                                               \
   void loconet_init()                                                         \
   {                                                                           \
+    /* Mark loconet as busy */                                                \
+    loconet_status.reg |= LOCONET_STATUS_BUSY;                                \
     /* Set Tx pin as output */                                                \
     HAL_GPIO_LOCONET_TX_out();                                                \
     HAL_GPIO_LOCONET_TX_pmuxen(PORT_PMUX_PMUXE_C_Val);                        \

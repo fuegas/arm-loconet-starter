@@ -88,13 +88,12 @@ void loconet_tx_process(void)
   if (!loconet_tx_queue) {
     // No message is in the queue
     return;
-  } else if (loconet_status.bit.COLLISION_DETECTED) {
-    return;
-  } else if (!loconet_status.bit.IDLE) {
+  } else if (loconet_status.reg & (LOCONET_STATUS_BUSY | LOCONET_STATUS_TRANSMIT | LOCONET_STATUS_COLLISION_DETECT)) {
     // We're not allowed to transmit, don't try to
-    return;
-  } else if (loconet_status.bit.TRANSMIT) {
-    // Do not start transmission if we're already sending
+    // This can be because:
+    // - the line is busy
+    // - we are already sending
+    // - a collision is detection
     return;
   }
 

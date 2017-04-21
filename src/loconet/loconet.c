@@ -195,16 +195,16 @@ static void loconet_flank_timer_delay(uint16_t delay_us) {
 void loconet_irq_flank_rise(void) {
   loconet_flank_timer_delay(LOCONET_DELAY_CARRIER_DETECT);
   loconet_timer_status.reg = LOCONET_TIMER_STATUS_CARRIER_DETECT;
-  // If flank changes, loconet is not idle anymore
-  loconet_status.bit.IDLE = 0;
+  // If flank changes, loconet is busy
+  loconet_status.reg |= LOCONET_STATUS_BUSY;
 }
 
 //-----------------------------------------------------------------------------
 void loconet_irq_flank_fall(void) {
   loconet_flank_timer_delay(LOCONET_DELAY_LINE_BREAK);
   loconet_timer_status.reg = LOCONET_TIMER_STATUS_LINE_BREAK;
-  // If flank changes, loconet is not idle anymore
-  loconet_status.bit.IDLE = 0;
+  // If flank changes, loconet is busy
+  loconet_status.reg |= LOCONET_STATUS_BUSY;
 }
 
 //-----------------------------------------------------------------------------
@@ -212,8 +212,8 @@ void loconet_irq_timer(void) {
   // Carrier detect?
   if (loconet_timer_status.bit.CARRIER_DETECT) {
     if (loconet_config.bit.MASTER) {
-      // Master, set as idle directly
-      loconet_status.reg |= LOCONET_STATUS_IDLE;
+      // Master, remove busy flag directly
+      loconet_status.bit.BUSY = 0;
     } else {
       // Start master delay
       loconet_flank_timer_delay(LOCONET_DELAY_MASTER_DELAY);
@@ -225,10 +225,10 @@ void loconet_irq_timer(void) {
       loconet_flank_timer_delay(loconet_config.bit.PRIORITY * LOCONET_DELAY_PRIORITY_DELAY);
       loconet_timer_status.reg = LOCONET_TIMER_STATUS_PRIORITY_DELAY;
     } else {
-      loconet_status.reg |= LOCONET_STATUS_IDLE;
+      loconet_status.bit.BUSY = 0;
     }
   } else if (loconet_timer_status.bit.PRIORITY_DELAY) {
-    loconet_status.reg |= LOCONET_STATUS_IDLE;
+    loconet_status.bit.BUSY = 0;
   } else if (loconet_timer_status.bit.LINE_BREAK) {
     // Remove collision detected flag
     loconet_status.bit.COLLISION_DETECTED = 0;
