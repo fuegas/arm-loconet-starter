@@ -46,6 +46,22 @@ __attribute__ ((weak, alias ("loconet_cv_written_event_dummy"))) \
   void loconet_cv_written_event(uint16_t, uint16_t);
 
 //-----------------------------------------------------------------------------
+uint8_t loconet_cv_write_allowed_core(uint16_t, uint16_t);
+uint8_t loconet_cv_write_allowed_core(uint16_t lncv_number, uint16_t lncv_value)
+{
+  switch (lncv_number) {
+    case 0:
+      return (lncv_value < 0x3FF) ? LOCONET_CV_ACK_OK : LOCONET_CV_ACK_ERROR_OUTOFRANGE;
+    case 1:
+      return LOCONET_CV_ACK_ERROR_READONLY;
+    case 2:
+      return (lncv_value > 0 && lncv_value < 0x010) ? LOCONET_CV_ACK_OK : LOCONET_CV_ACK_ERROR_OUTOFRANGE;
+    default:
+      return loconet_cv_write_allowed(lncv_number, lncv_value);
+  }
+}
+
+//-----------------------------------------------------------------------------
 static void loconet_cv_response(LOCONET_CV_MSG_Type *msg)
 {
   uint8_t resp_data[13];
@@ -174,7 +190,7 @@ uint8_t loconet_cv_set(uint16_t lncv_number, uint16_t lncv_value)
   }
 
   // Is this write allowed?
-  uint8_t ack = loconet_cv_write_allowed(lncv_number, lncv_value);
+  uint8_t ack = loconet_cv_write_allowed_core(lncv_number, lncv_value);
 
   uint8_t page = lncv_number / LOCONET_CV_PER_PAGE;
   uint8_t index = lncv_number % LOCONET_CV_PER_PAGE;
