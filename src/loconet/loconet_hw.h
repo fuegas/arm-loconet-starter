@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
 // Initializations
 extern void loconet_init(void);
-extern void loconet_init_usart(Sercom*, uint32_t, uint32_t, uint8_t, uint32_t);
+extern void loconet_init_usart(Sercom*, uint32_t, uint32_t, uint32_t, uint8_t, uint32_t);
 extern void loconet_init_flank_detection(uint8_t);
 extern void loconet_init_flank_timer(Tc*, uint32_t, uint32_t, uint32_t);
 extern void loconet_save_tx_pin(PortGroup*, uint32_t);
@@ -51,7 +51,12 @@ extern void loconet_activity_led_on(void);
 extern void loconet_activity_led_off(void);
 
 // Macro for loconet_init and irq_handler_sercom<nr>
-#define LOCONET_BUILD(pmux, sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad, fl_port, fl_pin, fl_int, fl_tmr, led_port, led_pin) \
+#define LOCONET_BUILD(                                                        \
+    pmux, sercom, tx_pad, rx_pad,                                             \
+    tx_port, tx_pin, rx_port, rx_pin,                                         \
+    fl_port, fl_pin, fl_int, fl_tmr,                                          \
+    led_port, led_pin                                                         \
+  )                                                                           \
   HAL_GPIO_PIN(LOCONET_TX, tx_port, tx_pin);                                  \
   HAL_GPIO_PIN(LOCONET_RX, rx_port, rx_pin);                                  \
   HAL_GPIO_PIN(LOCONET_FL, fl_port, fl_pin);                                  \
@@ -80,6 +85,7 @@ extern void loconet_activity_led_off(void);
       SERCOM##sercom,                                                         \
       PM_APBCMASK_SERCOM##sercom,                                             \
       SERCOM##sercom##_GCLK_ID_CORE,                                          \
+      SERCOM_USART_CTRLA_TXPO_PAD##tx_pad,                                    \
       rx_pad,                                                                 \
       SERCOM##sercom##_IRQn                                                   \
     );                                                                        \

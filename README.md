@@ -35,11 +35,12 @@ with:
 
  - pmux:    the PMUX channel you'd like to use (e.g. C)
  - sercom:  the SERCOM interface number you'd like to use (e.g. 3)
+ - tx_pad:  the PAD to use for TX output on the SERCOM interface (e.g. 0, see datasheet)
+ - rx_pad:  the PAD to use for RX input on the SERCOM interface (e.g. 1, see datasheet)
  - tx_port: the PORT of the TX output (e.g. A)
  - tx_pin:  the PIN of the TX output (e.g. 14)
  - rx_port: the PORT of the RX input (e.g. A)
  - rx_pin:  the PIN of the RX input (e.g. 15)
- - rx_pad:  the PAD to use for RX input on the SERCOM interface (e.g. 1, see datasheet)
  - fl_port: the PORT of the FLANK detection (e.g. A)
  - fl_pin:  the PIN of the FLANK detection (e.g. 13)
  - fl_int:  the external interrupt associated to fl_pin (e.g. 1, see datasheet)
@@ -50,10 +51,9 @@ with:
 For example, using SERCOM0 on PMUX D, to write using pin A04, read on pin A05, and to use pin A06 for flank detection, together with timer 0, we write:
 
     LOCONET_BUILD(
-      D,          /* pmux */
-      0,          /* sercom */
+      D, 0, 0, 1, /* sercom: pmux channel, sercom number, tx pad, rx pad */
       A, 4,       /* tx: port, pin */
-      A, 5, 1,    /* rx: port, pin, pad */
+      A, 5,       /* rx: port, pin */
       A, 6, 6, 0  /* flank: port, pin, interrupt, timer */
       A, 27,      /* activity led */
     );

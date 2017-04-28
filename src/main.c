@@ -41,10 +41,9 @@
 
 //-----------------------------------------------------------------------------
 LOCONET_BUILD(
-  D,          /* pmux */
-  0,          /* sercom */
+  D, 0, 0, 1, /* sercom: pmux channel, sercom number, tx pad, rx pad */
   A, 4,       /* tx: port, pin */
-  A, 5, 1,    /* rx: port, pin, pad */
+  A, 5,       /* rx: port, pin */
   A, 6, 6, 0, /* flank: port, pin, interrupt, timer */
   A, 27       /* activity led */
 );

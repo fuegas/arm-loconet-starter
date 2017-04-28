@@ -19,7 +19,7 @@ uint32_t loconet_tx_pin;
 
 //-----------------------------------------------------------------------------
 // Initialize USART for loconet
-void loconet_init_usart(Sercom *sercom, uint32_t pm_mask, uint32_t gclock_id, uint8_t rx_pad, uint32_t nvic_irqn)
+void loconet_init_usart(Sercom *sercom, uint32_t pm_mask, uint32_t gclock_id, uint32_t tx_pad, uint8_t rx_pad, uint32_t nvic_irqn)
 {
   // Save sercom
   loconet_sercom = sercom;
@@ -47,7 +47,8 @@ void loconet_init_usart(Sercom *sercom, uint32_t pm_mask, uint32_t gclock_id, ui
     SERCOM_USART_CTRLA_DORD
     | SERCOM_USART_CTRLA_MODE_USART_INT_CLK
     | SERCOM_USART_CTRLA_RXPO(rx_pad)
-    | SERCOM_USART_CTRLA_TXPO_PAD0;
+    | tx_pad;
+
 
   /* CTRLB register:
    *   RXEN:      0x01  Enable Rx
