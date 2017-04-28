@@ -103,7 +103,7 @@ extern void fast_clock_irq(void);
 // ------------------------------------------------------------------
 // This is the function that should be added to the main loop, as it
 // handles the actual time update.
-extern void fast_clock_loop(void);
+extern void fast_clock_process(void);
 
 
 // ------------------------------------------------------------------
@@ -142,7 +142,7 @@ extern void loconet_rx_fast_clock(uint8_t *data, uint8_t length);
 #define fast_clock_get_time(...) do {} while(0)
 #define fast_clock_get_time_as_int(...) do {} while(0)
 #define fast_clock_irq(...) do {} while(0)
-#define fast_clock_loop(...) do {} while(0)
+#define fast_clock_process(...) do {} while(0)
 #define fast_clock_init(...) do {} while(0)
 #define fast_clock_init_timer(...) do {} while(0)
 #define FAST_CLOCK_BUILD(...)

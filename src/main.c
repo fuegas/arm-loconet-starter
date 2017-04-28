@@ -149,7 +149,8 @@ int main(void)
     while(loconet_rx_process());
     // Send a message if there is one available
     loconet_tx_process();
-    fast_clock_loop();
+    // Process time updates if there are any
+    fast_clock_process();
   }
   return 0;
 }

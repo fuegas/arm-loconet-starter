@@ -81,7 +81,7 @@ In the main function of the project, ensure that you initialize loconet via `loc
       {
         while(loconet_rx_process());
         loconet_tx_process();
-        fast_clock_loop();
+        fast_clock_process();
         ...
       }
       return 0;
