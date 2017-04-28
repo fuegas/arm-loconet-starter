@@ -35,9 +35,6 @@ static LOCONET_RX_RINGBUFFER_Type loconet_rx_ringbuffer = { { 0 }, 0, 0};
 //-----------------------------------------------------------------------------
 void loconet_rx_buffer_push(uint8_t byte)
 {
-  // Turn rx led on
-  loconet_rx_led_on();
-
   // Get index + 1 of buffer head
   uint8_t index = (loconet_rx_ringbuffer.writer + 1) % LOCONET_RX_RINGBUFFER_Size;
 
@@ -50,9 +47,6 @@ void loconet_rx_buffer_push(uint8_t byte)
   // Write the byte
   loconet_rx_ringbuffer.buffer[loconet_rx_ringbuffer.writer] = byte;
   loconet_rx_ringbuffer.writer = index;
-
-  // Turn rx led off
-  loconet_rx_led_off();
 }
 
 //-----------------------------------------------------------------------------
@@ -356,9 +350,6 @@ uint8_t loconet_rx_process(void)
     return 0;
   }
 
-  // Turn on rx led
-  loconet_rx_led_on();
-
   // New message
   uint8_t message_size = 0;
   switch (opcode.bits.OPCODE) {
@@ -381,14 +372,12 @@ uint8_t loconet_rx_process(void)
   for (uint8_t index = reader + 1; index < index_of_writer_or_eom; index++) {
     if (buffer[index % LOCONET_RX_RINGBUFFER_Size] & LOCONET_OPCODE_FLAG) {
       loconet_rx_ringbuffer.reader = index % LOCONET_RX_RINGBUFFER_Size;
-      loconet_rx_led_off();
       return 1; // Read the new message right away
     }
   }
 
   // Check if we have all the bytes for this message
   if (writer < reader + message_size) {
-    loconet_rx_led_off();
     return 0;
   }
 
@@ -425,9 +414,6 @@ uint8_t loconet_rx_process(void)
 
   // Advance reader
   loconet_rx_ringbuffer.reader = (reader + message_size) % LOCONET_RX_RINGBUFFER_Size;
-
-  // Turn off rx led
-  loconet_rx_led_off();
 
   // Return that we have processed a message
   return 1;

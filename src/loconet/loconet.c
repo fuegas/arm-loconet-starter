@@ -254,6 +254,8 @@ static void loconet_irq_collision(void)
     loconet_tx_port->OUTSET.reg |= loconet_tx_pin;
     // Reset message to queue
     loconet_tx_reset_current_message_to_queue();
+    // Turn off activity led
+    loconet_activity_led_off();
   }
 }
 
@@ -279,8 +281,12 @@ void loconet_irq_sercom(void)
         loconet_irq_collision();
       }
     } else {
+      // Turn activity led on
+      loconet_activity_led_on();
       // Get data from USART and place it in the ringbuffer
       loconet_rx_buffer_push(loconet_sercom->USART.DATA.reg);
+      // Turn activity led off
+      loconet_activity_led_off();
     }
   }
 
@@ -290,6 +296,8 @@ void loconet_irq_sercom(void)
     loconet_sercom->USART.INTFLAG.reg |= SERCOM_USART_INTFLAG_TXC;
     // Clear transmit state and free memory
     loconet_tx_stop();
+    // Turn off activity led
+    loconet_activity_led_off();
   }
 
   // Data register empty (TX)
@@ -332,6 +340,8 @@ uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length)
 void loconet_sercom_enable_dre_irq(void)
 {
   loconet_sercom->USART.INTENSET.reg = SERCOM_USART_INTENSET_DRE;
+  // Turn on activity led
+  loconet_activity_led_on();
 }
 
 //-----------------------------------------------------------------------------

@@ -23,10 +23,8 @@
  * - fl_int:  the external interrupt associated to fl_pin
  *     (e.g. 1, see datasheet)
  * - fl_tmr:  the TIMER used for Carrier and Break detection
- * - tx_led_port: the PORT of the TX LED
- * - tx_led_pin:  the PIN of the TX LED
- * - rx_led_port: the PORT of the RX LED
- * - rx_led_pin:  the PIN of the RX LED
+ * - led_port: the PORT of the activity LED
+ * - led_pin:  the PIN of the activity LED
  *
  * Loconet uses CSMA/CD techniques to arbitrage and control network
  * access. The bit times are 60 uSecs or 16.66 KBaud +/- 1.5%. This
@@ -146,11 +144,9 @@ extern void loconet_irq_sercom(void);
 extern uint8_t loconet_handle_eic(void);
 
 //-----------------------------------------------------------------------------
-// Loconet Tx and Rx LED control
-extern void loconet_tx_led_on(void);
-extern void loconet_tx_led_off(void);
-extern void loconet_rx_led_on(void);
-extern void loconet_rx_led_off(void);
+// Loconet activity LED control
+extern void loconet_activity_led_on(void);
+extern void loconet_activity_led_off(void);
 
 //-----------------------------------------------------------------------------
 // Loconet loop to be used in the main loop
@@ -164,12 +160,11 @@ extern void loconet_sercom_enable_dre_irq(void);
 extern uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length);
 
 // Macro for loconet_init and irq_handler_sercom<nr>
-#define LOCONET_BUILD(pmux, sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad, fl_port, fl_pin, fl_int, fl_tmr, tx_led_port, tx_led_pin, rx_led_port, rx_led_pin) \
+#define LOCONET_BUILD(pmux, sercom, tx_port, tx_pin, rx_port, rx_pin, rx_pad, fl_port, fl_pin, fl_int, fl_tmr, led_port, led_pin) \
   HAL_GPIO_PIN(LOCONET_TX, tx_port, tx_pin);                                  \
   HAL_GPIO_PIN(LOCONET_RX, rx_port, rx_pin);                                  \
   HAL_GPIO_PIN(LOCONET_FL, fl_port, fl_pin);                                  \
-  HAL_GPIO_PIN(LOCONET_LED_TX, tx_led_port, tx_led_pin);                      \
-  HAL_GPIO_PIN(LOCONET_LED_RX, rx_led_port, rx_led_pin);                      \
+  HAL_GPIO_PIN(LOCONET_LED, led_port, led_pin);                               \
                                                                               \
   void loconet_init()                                                         \
   {                                                                           \
@@ -187,8 +182,8 @@ extern uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length);
     HAL_GPIO_LOCONET_FL_pullup();                                             \
     HAL_GPIO_LOCONET_FL_pmuxen(PORT_PMUX_PMUXE_A_Val);                        \
     /* Set Tx and Rx LED as output */                                         \
-    HAL_GPIO_LOCONET_LED_TX_out();                                            \
-    HAL_GPIO_LOCONET_LED_RX_out();                                            \
+    HAL_GPIO_LOCONET_LED_out();                                               \
+    HAL_GPIO_LOCONET_LED_clr();                                               \
     /* Initialize usart */                                                    \
     loconet_init_usart(                                                       \
       SERCOM##sercom,                                                         \
@@ -245,21 +240,13 @@ extern uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length);
   {                                                                           \
     loconet_irq_sercom();                                                     \
   }                                                                           \
-  void loconet_tx_led_on(void)                                                \
+  void loconet_activity_led_on(void)                                          \
   {                                                                           \
-    HAL_GPIO_LOCONET_LED_TX_set();                                            \
+    HAL_GPIO_LOCONET_LED_set();                                               \
   }                                                                           \
-  void loconet_tx_led_off(void)                                               \
+  void loconet_activity_led_off(void)                                         \
   {                                                                           \
-    HAL_GPIO_LOCONET_LED_TX_clr();                                            \
-  }                                                                           \
-  void loconet_rx_led_on(void)                                                \
-  {                                                                           \
-    HAL_GPIO_LOCONET_LED_RX_set();                                            \
-  }                                                                           \
-  void loconet_rx_led_off(void)                                               \
-  {                                                                           \
-    HAL_GPIO_LOCONET_LED_RX_clr();                                            \
+    HAL_GPIO_LOCONET_LED_clr();                                               \
   }                                                                           \
 
 #endif // _LOCONET_LOCONET_H_

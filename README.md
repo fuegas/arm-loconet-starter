@@ -44,10 +44,8 @@ with:
  - fl_pin:  the PIN of the FLANK detection (e.g. 13)
  - fl_int:  the external interrupt associated to fl_pin (e.g. 1, see datasheet)
  - fl_tmr:  the TIMER used for Carrier and Break detection
- - tx_led_port: the PORT of the TX LED
- - tx_led_pin:  the PIN of the TX LED
- - rx_led_port: the PORT of the RX LED
- - rx_led_pin:  the PIN of the RX LED
+ - led_port: the PORT of the activity LED
+ - led_pin:  the PIN of the activity LED
 
 For example, using SERCOM0 on PMUX D, to write using pin A04, read on pin A05, and to use pin A06 for flank detection, together with timer 0, we write:
 
@@ -57,8 +55,7 @@ For example, using SERCOM0 on PMUX D, to write using pin A04, read on pin A05, a
       A, 4,       /* tx: port, pin */
       A, 5, 1,    /* rx: port, pin, pad */
       A, 6, 6, 0  /* flank: port, pin, interrupt, timer */
-      A, 27,      /* tx led */
-      A, 28       /* rx led */
+      A, 27,      /* activity led */
     );
 
 

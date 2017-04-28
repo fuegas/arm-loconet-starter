@@ -15,7 +15,6 @@
 #define _LOCONET_LOCONET_RX_H_
 
 #include <stdint.h>
-#include "loconet.h"
 #include "loconet_cv.h"
 
 extern uint8_t loconet_rx_process(void);
