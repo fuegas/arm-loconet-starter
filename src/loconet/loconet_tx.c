@@ -106,7 +106,7 @@ void loconet_tx_process(void)
   loconet_tx_current->next = 0;
 
   // Start sending
-  loconet_sercom_enable_dre_irq();
+  loconet_enable_transmit();
 
   return;
 }
