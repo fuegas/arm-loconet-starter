@@ -145,7 +145,10 @@ int main(void)
   initialize();
 
   while (1) {
-    loconet_loop();
+    // If a message is received and handled, keep processing new messages
+    while(loconet_rx_process());
+    // Send a message if there is one available
+    loconet_tx_process();
     fast_clock_loop();
   }
   return 0;

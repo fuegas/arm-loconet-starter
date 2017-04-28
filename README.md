@@ -75,21 +75,13 @@ For flank detection, we require an IRQ handler for EIC. As there is only one in 
 In the main function of the project, ensure that you initialize loconet via `loconet_init()`. To be able to send and receive messages, use `loconet_loop()`;
 
     int main(void) {
-      ...
-      // Initialize loconet
-      loconet_init();
-      ...
-      // Set the loconet address
-      loconet_config.bit.ADDRESS = loconet_cv_get(0);
-      // Set the priority of this device
-      loconet_config.bit.PRIORITY = loconet_cv_get(2);
-      ...
-      // Initialize CVs for loconet
-      loconet_cv_init();
+      initialize();
       ...
       while(1)
       {
-        loconet_loop();
+        while(loconet_rx_process());
+        loconet_tx_process();
+        fast_clock_loop();
         ...
       }
       return 0;

@@ -121,16 +121,6 @@ uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length)
 }
 
 //-----------------------------------------------------------------------------
-// Should be included in the main loop to keep loconet going.
-void loconet_loop(void)
-{
-  // If a message is received and handled, keep processing new messages
-  while(loconet_rx_process());
-  // Send a message if there is one available
-  loconet_tx_process();
-}
-
-//-----------------------------------------------------------------------------
 void loconet_enable_transmit(void)
 {
   loconet_hw_enable_transmit();

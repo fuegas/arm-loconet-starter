@@ -15,7 +15,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "loconet_hw.h"
-#include "loconet_rx.h"
 #include "loconet_tx.h"
 
 //-----------------------------------------------------------------------------
@@ -74,11 +73,6 @@ extern uint8_t loconet_handle_eic(void);
 //-----------------------------------------------------------------------------
 // Calculate checksum of a message
 extern uint8_t loconet_calc_checksum(uint8_t *data, uint8_t length);
-
-//-----------------------------------------------------------------------------
-// Loconet loop to be used in the main loop
-// Handles processing and sending of messages
-extern void loconet_loop(void);
 
 //-----------------------------------------------------------------------------
 // Enable transmitting
