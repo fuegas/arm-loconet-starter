@@ -40,15 +40,12 @@
 #include "utils/logger.h"
 
 //-----------------------------------------------------------------------------
-// Loconet: Tx: PA14, Rx: PA15, Flank: PA13, Flank timer:
 LOCONET_BUILD(
-  D,          /* pmux */
-  0,          /* sercom */
+  D, 0, 0, 1, /* sercom: pmux channel, sercom number, tx pad, rx pad */
   A, 4,       /* tx: port, pin */
-  A, 5, 1,    /* rx: port, pin, pad */
+  A, 5,       /* rx: port, pin */
   A, 6, 6, 0, /* flank: port, pin, interrupt, timer */
-  A, 27,      /* tx led */
-  A, 28       /* rx led */
+  A, 27       /* activity led */
 );
 
 //-----------------------------------------------------------------------------
@@ -147,8 +144,12 @@ int main(void)
   initialize();
 
   while (1) {
-    loconet_loop();
-    fast_clock_loop();
+    // If a message is received and handled, keep processing new messages
+    while(loconet_rx_process());
+    // Send a message if there is one available
+    loconet_tx_process();
+    // Process time updates if there are any
+    fast_clock_process();
   }
   return 0;
 }

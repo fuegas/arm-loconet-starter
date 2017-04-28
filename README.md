@@ -35,30 +35,27 @@ with:
 
  - pmux:    the PMUX channel you'd like to use (e.g. C)
  - sercom:  the SERCOM interface number you'd like to use (e.g. 3)
+ - tx_pad:  the PAD to use for TX output on the SERCOM interface (e.g. 0, see datasheet)
+ - rx_pad:  the PAD to use for RX input on the SERCOM interface (e.g. 1, see datasheet)
  - tx_port: the PORT of the TX output (e.g. A)
  - tx_pin:  the PIN of the TX output (e.g. 14)
  - rx_port: the PORT of the RX input (e.g. A)
  - rx_pin:  the PIN of the RX input (e.g. 15)
- - rx_pad:  the PAD to use for RX input on the SERCOM interface (e.g. 1, see datasheet)
  - fl_port: the PORT of the FLANK detection (e.g. A)
  - fl_pin:  the PIN of the FLANK detection (e.g. 13)
  - fl_int:  the external interrupt associated to fl_pin (e.g. 1, see datasheet)
  - fl_tmr:  the TIMER used for Carrier and Break detection
- - tx_led_port: the PORT of the TX LED
- - tx_led_pin:  the PIN of the TX LED
- - rx_led_port: the PORT of the RX LED
- - rx_led_pin:  the PIN of the RX LED
+ - led_port: the PORT of the activity LED
+ - led_pin:  the PIN of the activity LED
 
 For example, using SERCOM0 on PMUX D, to write using pin A04, read on pin A05, and to use pin A06 for flank detection, together with timer 0, we write:
 
     LOCONET_BUILD(
-      D,          /* pmux */
-      0,          /* sercom */
+      D, 0, 0, 1, /* sercom: pmux channel, sercom number, tx pad, rx pad */
       A, 4,       /* tx: port, pin */
-      A, 5, 1,    /* rx: port, pin, pad */
+      A, 5,       /* rx: port, pin */
       A, 6, 6, 0  /* flank: port, pin, interrupt, timer */
-      A, 27,      /* tx led */
-      A, 28       /* rx led */
+      A, 27,      /* activity led */
     );
 
 
@@ -78,21 +75,13 @@ For flank detection, we require an IRQ handler for EIC. As there is only one in 
 In the main function of the project, ensure that you initialize loconet via `loconet_init()`. To be able to send and receive messages, use `loconet_loop()`;
 
     int main(void) {
-      ...
-      // Initialize loconet
-      loconet_init();
-      ...
-      // Set the loconet address
-      loconet_config.bit.ADDRESS = loconet_cv_get(0);
-      // Set the priority of this device
-      loconet_config.bit.PRIORITY = loconet_cv_get(2);
-      ...
-      // Initialize CVs for loconet
-      loconet_cv_init();
+      initialize();
       ...
       while(1)
       {
-        loconet_loop();
+        while(loconet_rx_process());
+        loconet_tx_process();
+        fast_clock_process();
         ...
       }
       return 0;
@@ -168,6 +157,26 @@ After a programming session to set some LNCVs, the system automatically calls th
     void loconet_cv_prog_off_event(void){
       ...
     }
+
+## Debugging / logging
+
+Before you can use the logger functions, initialize the logger using `logger_init(baudrate);`.
+
+Then you can log messages using the predefined functions:
+
+    logger_char(char) // Log a single character
+    logger_string(char *) // Log a string
+    logger_cstring(const char *) // Log an immutable string
+
+    logger_number(uint32_t) // Log a number written in base 10
+    logger_number_as_hex(uint32_t) // Log a number written in base 16
+    logger_number_as_bin(uint32_t) // Log a number written in base 2
+    logger_number_as_bin_padded(uint32_t value, uint8_t length) // Log a number written in base 2 left padded with 0's until length is reached
+
+    logger_newline() // Write a newline
+    logger_dot() // Write a .
+    logger_ok() // Write ' [ok]' and then a newline
+    logger_error() // Write ' [error]' and then a newline
 
 
 # Responding on received messages
