@@ -166,6 +166,26 @@ After a programming session to set some LNCVs, the system automatically calls th
       ...
     }
 
+## Debugging / logging
+
+Before you can use the logger functions, initialize the logger using `logger_init(baudrate);`.
+
+Then you can log messages using the predefined functions:
+
+    logger_char(char) // Log a single character
+    logger_string(char *) // Log a string
+    logger_cstring(const char *) // Log an immutable string
+
+    logger_number(uint32_t) // Log a number written in base 10
+    logger_number_as_hex(uint32_t) // Log a number written in base 16
+    logger_number_as_bin(uint32_t) // Log a number written in base 2
+    logger_number_as_bin_padded(uint32_t value, uint8_t length) // Log a number written in base 2 left padded with 0's until length is reached
+
+    logger_newline() // Write a newline
+    logger_dot() // Write a .
+    logger_ok() // Write ' [ok]' and then a newline
+    logger_error() // Write ' [error]' and then a newline
+
 
 # Responding on received messages
 
