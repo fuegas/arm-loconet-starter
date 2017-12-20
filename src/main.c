@@ -41,23 +41,21 @@
 
 //-----------------------------------------------------------------------------
 LOCONET_BUILD(
-  D, 0, 0, 1, /* sercom: pmux channel, sercom number, tx pad, rx pad */
-  A, 4,       /* tx: port, pin */
-  A, 5,       /* rx: port, pin */
-  A, 6, 6, 0, /* flank: port, pin, interrupt, timer */
-  A, 27       /* activity led */
+  D, 5, 2, 3,       /* sercom: pmux channel, sercom number, tx pad, rx pad */
+  B, 22,            /* tx: port, pin */
+  B, 23,            /* rx: port, pin */
+  A, 27, 15, 0,     /* flank: port, pin, interrupt, timer */
+  A, 28             /* activity led */
 );
 
 //-----------------------------------------------------------------------------
 FAST_CLOCK_BUILD(1);
 
 //-----------------------------------------------------------------------------
-// Logger Tx: PB22, Rx: PB23
 LOGGER_BUILD(
-  D,        /* pmux */
-  5,        /* sercom */
-  B, 22,    /* Tx: port, pin */
-  B, 23, 3  /* Rx: port, pin, pad */
+  C, 3, 2, 3,       /* sercom: pmux channel, sercom number, tx pad, rx pad */
+  A, 24,            /* Tx: port, pin */
+  A, 25,            /* Rx: port, pin */
 );
 
 
