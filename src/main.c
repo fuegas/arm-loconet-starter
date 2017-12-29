@@ -55,7 +55,7 @@ FAST_CLOCK_BUILD(1);
 LOGGER_BUILD(
   C, 3, 2, 3,       /* sercom: pmux channel, sercom number, tx pad, rx pad */
   A, 24,            /* Tx: port, pin */
-  A, 25,            /* Rx: port, pin */
+  A, 25             /* Rx: port, pin */
 );
 
 
