@@ -11,8 +11,9 @@
  * Note: The current implementation only works for a chip running on default
  * speed (8MHz).
  *
- * Note: Interrupts can cause a delay to take longer than specified as this
- * implementation uses busy waiting instead of a timer.
+ * Note: Interrupts will fire and take time to process. This can cause a delay
+ * to take longer than specified. The main loop however will wait for this
+ * delay to finish as it is implementated using busy waiting.
  *
  * \copyright Copyright 2017 /Dev. All rights reserved.
  * \license This project is released under MIT license.
@@ -29,6 +30,14 @@ OPTIMIZE_HIGH
 RAMFUNC
 extern void _cycle_delay(unsigned long n);
 
+/*
+ * @def DELAY_MULT
+ * @brief Multiplication value to get to 1 millisecond delay
+ *
+ * This value is (currently) not calculated but empirically determined using a
+ * logic analyser. This is also the reason only a single F_CPU is supported
+ * for now.
+ */
 #if F_CPU == 8000000UL
 #  define DELAY_MULT 1144
 #else
