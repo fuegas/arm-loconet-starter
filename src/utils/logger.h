@@ -37,6 +37,7 @@
 #ifdef UTILS_LOGGER
 
 #include <stdint.h>
+#include "delay.h"
 
 #define LOGGER_BUILD(                                                         \
     pmux, sercom, tx_pad, rx_pad,                                             \
@@ -84,10 +85,12 @@
     /* Enable the peripheral */                                               \
     SERCOM##sercom->USART.CTRLA.reg |= SERCOM_USART_CTRLA_ENABLE;             \
                                                                               \
+    /* Let sercom initialize */                                               \
+    delay_us(200);                                                            \
+                                                                              \
     /* Send hello message */                                                  \
     logger_cstring(logger_newline);                                           \
     logger_cstring(logger_hello);                                             \
-    logger_cstring(logger_newline);                                           \
     logger_cstring(logger_newline);                                           \
   }                                                                           \
                                                                               \
