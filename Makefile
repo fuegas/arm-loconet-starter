@@ -41,6 +41,16 @@ SIZE        = $(CROSS)size
 OPENOCD     = openocd
 OCLINT      = oclint
 
+NOTIFIER     ?= growlnotify
+NOTIFIER_BIN  = $(shell which $(NOTIFIER))
+NOTIFIER_OK  ?= $(NOTIFIER_BIN) --image ./resources/check-circle.png --message "Build success ヽ(°□°)ﾉ"
+NOTIFIER_NOK ?= $(NOTIFIER_BIN) --image ./resources/angry.png --message "Build failed (╯°□°）╯︵ ┻━┻"
+
+ifeq ($(NOTIFIER_BIN),"")
+	NOTIFIER_OK  = true
+	NOTIFIER_NOK = true
+endif
+
 # Objects dir
 OBJECTS_DIR = $(BUILD_DIR)/obj
 
@@ -267,7 +277,7 @@ $(LSS): $(ELF)
 $(BIN): $(ELF)
 	@$(call log_info,Create binary from elf)
 	@$(COL_ERROR)
-	@$(OBJCOPY) --output-target binary $(ELF) $(HEX)
+	@$(OBJCOPY) --output-target binary $(ELF) $(HEX) && $(NOTIFIER_OK)
 	@$(call log_ok)
 
 size: $(ELF)
@@ -282,7 +292,7 @@ size: $(ELF)
 %.o:
 	@$(call log_info,Compiling $(filter %/$(subst .o,.c,$(notdir $@)), $(SOURCES)))
 	@$(COL_ERROR)
-	@$(CC) $(CC_FLAGS) $(filter %/$(subst .o,.c,$(notdir $@)), $(SOURCES)) -c -o $@
+	@$(CC) $(CC_FLAGS) $(filter %/$(subst .o,.c,$(notdir $@)), $(SOURCES)) -c -o $@ || $(NOTIFIER_NOK)
 	@$(call log_ok)
 
 .S.o:
