@@ -57,6 +57,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "loconet/loconet_tx_messages.h"
+#include "loconet/loconet_rx.h"
 #include "utils/logger.h"
 
 typedef struct {
@@ -105,13 +106,15 @@ extern void fast_clock_irq(void);
 // handles the actual time update.
 extern void fast_clock_process(void);
 
-
+// callback function to be registered in loconet_rx
+extern void fast_clock_get_update(uint8_t, uint8_t*, uint8_t);
 // ------------------------------------------------------------------
 extern void fast_clock_init(void);
+extern void fast_clock_init_hw(void);
 extern void fast_clock_init_timer(Tc*, uint32_t, uint32_t, uint32_t);
 
 #define FAST_CLOCK_BUILD(timer)                                               \
-  void fast_clock_init(void)                                                  \
+  void fast_clock_init_hw(void)                                               \
   {                                                                           \
     fast_clock_init_timer(                                                    \
       TC##timer,                                                              \

@@ -9,6 +9,7 @@
  */
 
 #include "fast_clock.h"
+#include "loconet/loconet_messages.h"
 
 // Do we want this component?
 #ifdef COMPONENTS_FAST_CLOCK
@@ -124,8 +125,15 @@ void fast_clock_set_rate(uint8_t rate)
 
 //----------------------------------------------------------------------------
 // This function processes the clock information sent on the loconet
-void loconet_rx_fast_clock(uint8_t *data, uint8_t length)
+void fast_clock_get_update(uint8_t opcode, uint8_t *data, uint8_t length)
 {
+  if (opcode != LOCONET_OPC_RW_SL_DATA || length < 8) return;
+  // check if the first byte is indeed the code for the fastclock
+  if (data[0] != 0x7B) return;
+
+  // we got through! Now shift the data array one forward.
+  data = &data[1];
+
   if (length < 8)
   {
     return;
@@ -260,6 +268,12 @@ uint16_t fast_clock_get_time_as_int(void)
 void fast_clock_handle_update_dummy(FAST_CLOCK_TIME_Type time)
 {
   (void) time;
+}
+
+void fast_clock_init()
+{
+  fast_clock_init_hw();
+  loconet_rx_register_callback(LOCONET_OPC_RW_SL_DATA, fast_clock_get_update);
 }
 
 #endif // COMPONENTS_FAST_CLOCK
