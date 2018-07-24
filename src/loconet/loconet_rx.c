@@ -10,6 +10,7 @@
  */
 
 #include "loconet_rx.h"
+#include "loconet_messages.h"
 
 //-----------------------------------------------------------------------------
 // Prototypes
@@ -403,16 +404,16 @@ uint8_t loconet_rx_process(void)
   // Handle message
   switch(opcode.bits.OPCODE) {
     case 0x04: // Length 0
-      (*ln_messages_0[opcode.bits.NUMBER])();
+      loconet_rx_notify(opcode.bits.NUMBER, 0, 0);
       break;
     case 0x05: // Length 2
-      (*ln_messages_2[opcode.bits.NUMBER])(data[1], data[2]);
+      loconet_rx_notify(opcode.bits.NUMBER, &data[1], 2);
       break;
     case 0x06: // Length 4
-      (*ln_messages_4[opcode.bits.NUMBER])(data[1], data[2], data[3], data[4]);
+      loconet_rx_notify(opcode.bits.NUMBER, &data[1], 4);
       break;
     case 0x07: // Variable length
-      (*ln_messages_n[opcode.bits.NUMBER])(&data[2], message_size - 3);
+      loconet_rx_notify(opcode.bits.NUMBER, &data[2], message_size - 3);
       break;
   }
 
