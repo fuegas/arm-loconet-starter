@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include "loconet_cv.h"
 
+extern void loconet_rx_init(void);
 extern uint8_t loconet_rx_process(void);
 extern void loconet_rx_buffer_push(uint8_t);
 
