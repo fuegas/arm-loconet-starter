@@ -18,6 +18,10 @@ void loconet_rx_dummy_2(uint8_t, uint8_t);
 void loconet_rx_dummy_4(uint8_t, uint8_t, uint8_t, uint8_t);
 void loconet_rx_dummy_n(uint8_t*, uint8_t);
 
+// internal function used to notify all listeners to some opcode
+void loconet_rx_notify(uint8_t opcode, uint8_t*, uint8_t);
+
+
 //-----------------------------------------------------------------------------
 // Define LOCONET_RX_RINGBUFFER_Size if it's not defined
 #ifndef LOCONET_RX_RINGBUFFER_Size
@@ -443,4 +447,81 @@ void loconet_rx_dummy_n(uint8_t *d, uint8_t l)
 {
   (void)d;
   (void)l;
+}
+
+//-----------------------------------------------------------------------------
+// Observer pattern for reacting on incoming messages, based on their OPCODE.
+
+// Implemented using a linked list
+typedef struct LOCONET_RX_OBSERVERITEM {
+  // opcode to register for
+  uint8_t opcode;
+  // callback function
+  void (*callback)(uint8_t, uint8_t*, uint8_t);
+  // next list item
+  struct LOCONET_RX_OBSERVERITEM *next;
+} LOCONET_RX_OBSERVERITEM_Type;
+
+// This is the first element in the linked list of observers
+LOCONET_RX_OBSERVERITEM_Type *loconet_rx_observer_list_first = 0;
+// And the last element of the list
+LOCONET_RX_OBSERVERITEM_Type *loconet_rx_observer_list_last = 0;
+
+// size of the linked list
+uint8_t loconet_rx_observer_listsize = 0;
+
+void loconet_rx_register_callback(uint8_t opcode, void (*callback)(uint8_t, uint8_t*, uint8_t))
+{
+  LOCONET_RX_OBSERVERITEM_Type *item = malloc(sizeof(LOCONET_RX_OBSERVERITEM_Type));
+  memset(item, 0, sizeof(LOCONET_RX_OBSERVERITEM_Type));
+
+  item->opcode = opcode;
+  item->callback = callback;
+
+  if (loconet_rx_observer_listsize) {
+    loconet_rx_observer_list_first = item;
+  } else {
+    loconet_rx_observer_list_last->next = item;
+  }
+  loconet_rx_observer_list_last = item;
+
+  loconet_rx_observer_listsize++;
+}
+
+void loconet_rx_unregister_callback(uint8_t opcode, void (*callback)(uint8_t, uint8_t*, uint8_t))
+{
+  LOCONET_RX_OBSERVERITEM_Type *cur = loconet_rx_observer_list_first;
+  LOCONET_RX_OBSERVERITEM_Type *prev = 0;
+
+  // iterate the linked list, and remove all elements that are similar
+  while(cur) {
+    if (cur->opcode == opcode &&  cur->callback == callback) {
+      // remove item
+      LOCONET_RX_OBSERVERITEM_Type *del = cur;
+      if (prev) {
+        prev->next = cur->next;
+      } else {
+        loconet_rx_observer_list_first = cur->next;
+      }
+      free(del);
+      cur = prev;
+      loconet_rx_observer_listsize--;
+    } // end remove item
+    prev = cur;
+    cur = cur->next;
+  }
+}
+
+void loconet_rx_notify(uint8_t opcode, uint8_t* arr, uint8_t size)
+{
+  if (loconet_rx_observer_listsize == 0) return;
+
+  LOCONET_RX_OBSERVERITEM_Type *cur = loconet_rx_observer_list_first;
+
+  while(cur) {
+    if (cur->opcode == opcode) {
+      cur->callback(opcode, arr, size);
+    }
+    cur = cur->next;
+  }
 }
