@@ -50,76 +50,6 @@ void loconet_rx_buffer_push(uint8_t byte)
 }
 
 //-----------------------------------------------------------------------------
-/*
-// Special handlers which cannot be overriden
-static void loconet_rx_wr_sl_data_(uint8_t*, uint8_t);
-static void loconet_rx_rd_sl_data_(uint8_t*, uint8_t);
-static void loconet_rx_peer_xfer_(uint8_t*, uint8_t);
-static void loconet_rx_imm_packet_(uint8_t*, uint8_t);
-
-//-----------------------------------------------------------------------------
-// Read slot data (SL_RD_DATA)
-// Handle special cases
-static void loconet_rx_rd_sl_data_(uint8_t *data, uint8_t length) {
-  if (data[0] == 0x7C) { // Program task final
-    loconet_rx_prog_task_final(&data[1], length - 1);
-  } else { // Default handler
-    loconet_rx_rd_sl_data(data, length);
-  }
-}
-
-//-----------------------------------------------------------------------------
-// Write slot data (RW_SL_DATA)
-// Handle special cases
-static void loconet_rx_wr_sl_data_(uint8_t *data, uint8_t length) {
-  if (data[0] == 0x7B) { // Fast clock
-    loconet_rx_fast_clock(&data[1], length - 1);
-  } else if (data[0] == 0x7C) { // Program task start
-    loconet_rx_prog_task_start(&data[1], length - 1);
-  } else { // Default handler
-    // loconet_rx_wr_sl_data(data, length);
-  }
-}
-
-//-----------------------------------------------------------------------------
-// Fix most significant bits for LNCV messages from an IntelliBox
-static void loconet_fix_msb(uint8_t msb, uint8_t *data, uint8_t length)
-{
-  for (uint8_t index = 0; index < length; index++) {
-    *data++ |= ((msb & (1 << index)) << (length - index));
-  }
-}
-
-//-----------------------------------------------------------------------------
-// Peer to peer transfer
-// Handle special cases
-static void loconet_rx_peer_xfer_(uint8_t *data, uint8_t length) {
-  // Length 12 and source KPU, we take over the message
-  if (length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
-    loconet_fix_msb(data[4], &data[5], 7);
-    loconet_cv_process((LOCONET_CV_MSG_Type *)data, 0xE5);
-  } else {
-    // Call normal function
-    // loconet_rx_peer_xfer(data, length);
-  }
-}
-
-//-----------------------------------------------------------------------------
-// IMM Packet
-// Handle special cases
-static void loconet_rx_imm_packet_(uint8_t *data, uint8_t length) {
-  // Length 12 and source KPU, we take over the message
-  if (length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
-    loconet_fix_msb(data[4], &data[5], 7);
-    loconet_cv_process((LOCONET_CV_MSG_Type *)data, 0xED);
-  } else {
-    // Call normal function
-    // loconet_rx_imm_packet(data, length);
-  }
-}
-*/
-
-//-----------------------------------------------------------------------------
 typedef union {
   struct {
     uint8_t NUMBER:5;
@@ -228,12 +158,6 @@ uint8_t loconet_rx_process(void)
 
   // Return that we have processed a message
   return 1;
-}
-
-
-//-----------------------------------------------------------------------------
-void loconet_rx_init()
-{
 }
 
 //-----------------------------------------------------------------------------
