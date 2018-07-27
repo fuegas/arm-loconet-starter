@@ -19,8 +19,22 @@ void loconet_cv_prog_off_event_dummy(void)
 {
 }
 
+void loconet_cv_prog_task_dummy(uint8_t*, uint8_t);
+void loconet_cv_prog_task_dummy(uint8_t* data, uint8_t length)
+{
+  (void) data;
+  (void) length;
+}
+
+
 __attribute__ ((weak, alias ("loconet_cv_prog_off_event_dummy"))) \
   void loconet_cv_prog_off_event(void);
+
+__attribute__ ((weak, alias ("loconet_cv_prog_off_event_dummy"))) \
+  void loconet_cv_prog_task_start(uint8_t*, uint8_t);
+
+__attribute__ ((weak, alias ("loconet_cv_prog_off_event_dummy"))) \
+  void loconet_cv_prog_task_final(uint8_t*, uint8_t);
 
 //-----------------------------------------------------------------------------
 uint8_t loconet_cv_write_allowed_dummy(uint16_t, uint16_t);
@@ -246,17 +260,17 @@ void loconet_cv_imm_packet(uint8_t opcode, uint8_t *data, uint8_t length)
 }
 
 void loconet_cv_wr_sl_data(uint8_t opcode, uint8_t *data, uint8_t length) {
-  if (opcode == LOCONET_OPC_WR_SL_DATA && data[0] == 0x7C) { // Program task start
-    // @TODO: Deze functie kan ik nergens in de code vinden!!!
-    // loconet_rx_prog_task_start(&data[1], length - 1);
+  if (opcode == LOCONET_OPC_WR_SL_DATA && data[0] == 0x7C) {
+    // Program task start
+    loconet_cv_prog_task_start(&data[1], length - 1);
     (void) length;
   }
 }
 
 void loconet_cv_rd_sl_data(uint8_t opcode, uint8_t *data, uint8_t length) {
-  if (opcode == LOCONET_OPC_RD_SL_DATA && data[0] == 0x7C) { // Program task final
-    // @TODO: Deze functie kan ik nergens in de code vinden!!!
-    // loconet_rx_prog_task_final(&data[1], length - 1);
+  if (opcode == LOCONET_OPC_RD_SL_DATA && data[0] == 0x7C) {
+    // Program task final
+    loconet_cv_prog_task_final(&data[1], length - 1);
     (void) length;
   }
 }
@@ -279,10 +293,11 @@ enum status_code loconet_cv_init(void)
   loconet_cv_programming = false;
 
 
-  // register callback function on RX
+  // Register callback function on RX
   loconet_rx_register_callback(LOCONET_OPC_PEER_XFER, loconet_cv_peer_xfer);
   loconet_rx_register_callback(LOCONET_OPC_IMM_PACKET, loconet_cv_imm_packet);
   loconet_rx_register_callback(LOCONET_OPC_WR_SL_DATA, loconet_cv_wr_sl_data);
   loconet_rx_register_callback(LOCONET_OPC_RD_SL_DATA, loconet_cv_rd_sl_data);
+
   return STATUS_OK;
 }
