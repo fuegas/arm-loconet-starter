@@ -14,8 +14,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "loconet_hw.h"
-#include "loconet_tx.h"
+#include "loconet/loconet_hw.h"
 
 //-----------------------------------------------------------------------------
 typedef union {

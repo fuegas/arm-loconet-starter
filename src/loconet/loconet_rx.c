@@ -10,7 +10,6 @@
  */
 
 #include "loconet_rx.h"
-#include "loconet_messages.h"
 
 //-----------------------------------------------------------------------------
 // Prototypes
