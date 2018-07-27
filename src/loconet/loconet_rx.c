@@ -14,7 +14,7 @@
 
 //-----------------------------------------------------------------------------
 // Prototypes
-// internal function used to notify all listeners to some opcode
+// Internal function used to notify all listeners to some opcode
 void loconet_rx_notify(uint8_t opcode, uint8_t*, uint8_t);
 
 
@@ -137,20 +137,11 @@ uint8_t loconet_rx_process(void)
     return 0;
   }
 
-  // Handle message
-  switch(opcode.bits.OPCODE) {
-    case 0x04: // Length 0
-      loconet_rx_notify(opcode.bits.NUMBER, 0, 0);
-      break;
-    case 0x05: // Length 2
-      loconet_rx_notify(opcode.bits.NUMBER, &data[1], 2);
-      break;
-    case 0x06: // Length 4
-      loconet_rx_notify(opcode.bits.NUMBER, &data[1], 4);
-      break;
-    case 0x07: // Variable length
-      loconet_rx_notify(opcode.bits.NUMBER, &data[2], message_size - 3);
-      break;
+  // Check whether the OPCODE is variable length
+  if (opcode.bits.OPCODE == 0x07) {
+    loconet_rx_notify(opcode.bits.NUMBER, &data[2], message_size - 3);
+  } else {
+    loconet_rx_notify(opcode.bits.NUMBER, &data[1], message_size - 2);
   }
 
   // Advance reader
