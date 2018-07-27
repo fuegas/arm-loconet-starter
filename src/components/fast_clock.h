@@ -56,9 +56,14 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+// Needed, as the fast_clock component can serve as a master, and send
+// Fast Clock messages itself.
 #include "loconet/loconet_tx_messages.h"
+
+#include "loconet/loconet_messages.h"
 #include "loconet/loconet_rx.h"
 #include "utils/logger.h"
+
 
 typedef struct {
   uint8_t second;

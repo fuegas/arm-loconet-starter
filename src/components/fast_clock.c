@@ -9,7 +9,6 @@
  */
 
 #include "fast_clock.h"
-#include "loconet/loconet_messages.h"
 
 // Do we want this component?
 #ifdef COMPONENTS_FAST_CLOCK
