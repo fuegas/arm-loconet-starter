@@ -88,9 +88,9 @@ extern enum status_code loconet_cv_init(void);
 
 //-----------------------------------------------------------------------------
 // Callback functions for listening on the RX messages to be programmed.
-extern void loconet_cv_peer_xfer( uint8_t, uint8_t*, uint8_t);
-extern void loconet_cv_imm_packet(uint8_t, uint8_t*, uint8_t);
-extern void loconet_cv_wr_sl_data(uint8_t, uint8_t*, uint8_t);
-extern void loconet_cv_rd_sl_data(uint8_t, uint8_t*, uint8_t);
+extern void loconet_cv_peer_xfer( uint8_t*, uint8_t);
+extern void loconet_cv_imm_packet(uint8_t*, uint8_t);
+extern void loconet_cv_wr_sl_data(uint8_t*, uint8_t);
+extern void loconet_cv_rd_sl_data(uint8_t*, uint8_t);
 
 #endif // _LOCONET_LOCONET_CV_H_

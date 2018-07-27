@@ -125,7 +125,7 @@ void fast_clock_set_rate(uint8_t rate)
 
 //----------------------------------------------------------------------------
 // This function processes the clock information sent on the loconet
-void fast_clock_get_update(uint8_t opcode, uint8_t *data, uint8_t length)
+void fast_clock_get_update(uint8_t *data, uint8_t length)
 {
   if (opcode != LOCONET_OPC_RW_SL_DATA || length < 8) return;
   // check if the first byte is indeed the code for the fastclock

@@ -106,8 +106,8 @@ extern void fast_clock_irq(void);
 // handles the actual time update.
 extern void fast_clock_process(void);
 
-// callback function to be registered in loconet_rx
-extern void fast_clock_get_update(uint8_t, uint8_t*, uint8_t);
+// Callback function to be registered in loconet_rx
+extern void fast_clock_get_update(uint8_t*, uint8_t);
 // ------------------------------------------------------------------
 extern void fast_clock_init(void);
 extern void fast_clock_init_hw(void);

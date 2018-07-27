@@ -240,38 +240,38 @@ static void loconet_cv_fix_msb(uint8_t msb, uint8_t *data, uint8_t length)
 }
 
 //-----------------------------------------------------------------------------
-//
-void loconet_cv_peer_xfer(uint8_t opcode, uint8_t* data, uint8_t length)
+// Callback functions to hook unto the RX
+
+void loconet_cv_peer_xfer(uint8_t* data, uint8_t length)
 {
   // Length 12 and source KPU, we take the message
-  if (opcode == LOCONET_OPC_PEER_XFER && length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
+  if (length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
     loconet_cv_fix_msb(data[4], &data[5], 7);
     loconet_cv_process((LOCONET_CV_MSG_Type *)data, 0xE5);
   }
 }
 
-void loconet_cv_imm_packet(uint8_t opcode, uint8_t *data, uint8_t length)
+void loconet_cv_imm_packet(uint8_t *data, uint8_t length)
 {
   // Length 12 and source KPU, we take over the message
-  if (opcode == LOCONET_OPC_IMM_PACKET && length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
+  if (length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
     loconet_cv_fix_msb(data[4], &data[5], 7);
     loconet_cv_process((LOCONET_CV_MSG_Type *)data, 0xED);
   }
 }
 
-void loconet_cv_wr_sl_data(uint8_t opcode, uint8_t *data, uint8_t length) {
-  if (opcode == LOCONET_OPC_WR_SL_DATA && data[0] == 0x7C) {
+void loconet_cv_wr_sl_data(uint8_t *data, uint8_t length) {
+  if (length > 0 && data[0] == 0x7C) {
     // Program task start
     loconet_cv_prog_task_start(&data[1], length - 1);
     (void) length;
   }
 }
 
-void loconet_cv_rd_sl_data(uint8_t opcode, uint8_t *data, uint8_t length) {
-  if (opcode == LOCONET_OPC_RD_SL_DATA && data[0] == 0x7C) {
+void loconet_cv_rd_sl_data(uint8_t *data, uint8_t length) {
+  if (length > 0 && data[0] == 0x7C) {
     // Program task final
     loconet_cv_prog_task_final(&data[1], length - 1);
-    (void) length;
   }
 }
 

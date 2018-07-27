@@ -136,7 +136,7 @@ uint8_t loconet_rx_process(void)
     return 0;
   }
 
-  // Check whether the OPCODE is variable length
+  // Call notifier, but first check whether the OPCODE is of variable length
   if (opcode.bits.OPCODE == 0x07) {
     loconet_rx_notify(opcode.bits.NUMBER, &data[2], message_size - 3);
   } else {
@@ -155,23 +155,23 @@ uint8_t loconet_rx_process(void)
 
 // Implemented using a linked list
 typedef struct LOCONET_RX_OBSERVERITEM {
-  // opcode to register for
+  // Opcode to register for
   uint8_t opcode;
-  // callback function
-  void (*callback)(uint8_t, uint8_t*, uint8_t);
-  // next list item
+  // Callback function
+  void (*callback)(uint8_t*, uint8_t);
+  // Next list item
   struct LOCONET_RX_OBSERVERITEM *next;
 } LOCONET_RX_OBSERVERITEM_Type;
 
-// This is the first element in the linked list of observers
+// The first element in the linked list of observers
 LOCONET_RX_OBSERVERITEM_Type *loconet_rx_observer_list_first = 0;
-// And the last element of the list
+// The last element of the list
 LOCONET_RX_OBSERVERITEM_Type *loconet_rx_observer_list_last = 0;
 
-// size of the linked list
+// Size of the linked list
 uint8_t loconet_rx_observer_listsize = 0;
 
-void loconet_rx_register_callback(uint8_t opcode, void (*callback)(uint8_t, uint8_t*, uint8_t))
+void loconet_rx_register_callback(uint8_t opcode, void (*callback)(uint8_t*, uint8_t))
 {
   LOCONET_RX_OBSERVERITEM_Type *item = malloc(sizeof(LOCONET_RX_OBSERVERITEM_Type));
   memset(item, 0, sizeof(LOCONET_RX_OBSERVERITEM_Type));
@@ -189,15 +189,15 @@ void loconet_rx_register_callback(uint8_t opcode, void (*callback)(uint8_t, uint
   loconet_rx_observer_listsize++;
 }
 
-void loconet_rx_unregister_callback(uint8_t opcode, void (*callback)(uint8_t, uint8_t*, uint8_t))
+void loconet_rx_unregister_callback(uint8_t opcode, void (*callback)(uint8_t*, uint8_t))
 {
   LOCONET_RX_OBSERVERITEM_Type *cur = loconet_rx_observer_list_first;
   LOCONET_RX_OBSERVERITEM_Type *prev = 0;
 
-  // iterate the linked list, and remove all elements that are similar
+  // Iterate the linked list, and remove all elements that are similar
   while(cur) {
     if (cur->opcode == opcode &&  cur->callback == callback) {
-      // remove item
+      // Remove item
       LOCONET_RX_OBSERVERITEM_Type *del = cur;
       if (prev) {
         prev->next = cur->next;
@@ -207,7 +207,7 @@ void loconet_rx_unregister_callback(uint8_t opcode, void (*callback)(uint8_t, ui
       free(del);
       cur = prev;
       loconet_rx_observer_listsize--;
-    } // end remove item
+    } // End remove item
     prev = cur;
     cur = cur->next;
   }
@@ -215,13 +215,15 @@ void loconet_rx_unregister_callback(uint8_t opcode, void (*callback)(uint8_t, ui
 
 void loconet_rx_notify(uint8_t opcode, uint8_t* arr, uint8_t size)
 {
-  if (loconet_rx_observer_listsize == 0) return;
+  if (loconet_rx_observer_listsize == 0) {
+    return;
+  }
 
   LOCONET_RX_OBSERVERITEM_Type *cur = loconet_rx_observer_list_first;
 
   while(cur) {
     if (cur->opcode == opcode) {
-      cur->callback(opcode, arr, size);
+      cur->callback(arr, size);
     }
     cur = cur->next;
   }

@@ -34,9 +34,9 @@ extern void loconet_rx_buffer_push(uint8_t);
 //   - size  : the length of the message (i.e., number of bytes)
 
 // Registers a callback function to an opcode
-extern void loconet_rx_register_callback(uint8_t opcode, void (*callback)(uint8_t, uint8_t*, uint8_t));
+extern void loconet_rx_register_callback(uint8_t opcode, void (*callback)(uint8_t*, uint8_t));
 
 // Removes a callback function from an opcode
-extern void loconet_rx_unregister_callback(uint8_t opcode, void (*callback)(uint8_t, uint8_t*, uint8_t));
+extern void loconet_rx_unregister_callback(uint8_t opcode, void (*callback)(uint8_t*, uint8_t));
 
 #endif // _LOCONET_LOCONET_RX_H_
