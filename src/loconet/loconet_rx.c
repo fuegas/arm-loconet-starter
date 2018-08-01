@@ -179,7 +179,7 @@ void loconet_rx_register_callback(uint8_t opcode, void (*callback)(uint8_t*, uin
   item->opcode = opcode;
   item->callback = callback;
 
-  if (loconet_rx_observer_listsize) {
+  if (loconet_rx_observer_listsize == 0) {
     loconet_rx_observer_list_first = item;
   } else {
     loconet_rx_observer_list_last->next = item;
