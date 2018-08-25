@@ -195,9 +195,7 @@ void fast_clock_irq(void)
 }
 
 // ----------------------------------------------------------------------------
-// This function should be added to the main loop, as it handles the actual
-// update of the curent_time, instead of an IRQ.
-void fast_clock_loop(void)
+void fast_clock_process(void)
 {
 
   // Keeps track whether we need an update. We only send an update

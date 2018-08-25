@@ -40,27 +40,22 @@
 #include "utils/logger.h"
 
 //-----------------------------------------------------------------------------
-// Loconet: Tx: PA14, Rx: PA15, Flank: PA13, Flank timer:
 LOCONET_BUILD(
-  D,          /* pmux */
-  0,          /* sercom */
-  A, 4,       /* tx: port, pin */
-  A, 5, 1,    /* rx: port, pin, pad */
-  A, 6, 6, 0, /* flank: port, pin, interrupt, timer */
-  A, 27,      /* tx led */
-  A, 28       /* rx led */
+  D, 5, 2, 3,       /* sercom: pmux channel, sercom number, tx pad, rx pad */
+  B, 22,            /* tx: port, pin */
+  B, 23,            /* rx: port, pin */
+  A, 27, 15, 0,     /* flank: port, pin, interrupt, timer */
+  A, 28             /* activity led */
 );
 
 //-----------------------------------------------------------------------------
 FAST_CLOCK_BUILD(1);
 
 //-----------------------------------------------------------------------------
-// Logger Tx: PB22, Rx: PB23
 LOGGER_BUILD(
-  D,        /* pmux */
-  5,        /* sercom */
-  B, 22,    /* Tx: port, pin */
-  B, 23, 3  /* Rx: port, pin, pad */
+  C, 3, 2, 3,       /* sercom: pmux channel, sercom number, tx pad, rx pad */
+  A, 24,            /* Tx: port, pin */
+  A, 25             /* Rx: port, pin */
 );
 
 
@@ -147,8 +142,12 @@ int main(void)
   initialize();
 
   while (1) {
-    loconet_loop();
-    fast_clock_loop();
+    // If a message is received and handled, keep processing new messages
+    while(loconet_rx_process());
+    // Send a message if there is one available
+    loconet_tx_process();
+    // Process time updates if there are any
+    fast_clock_process();
   }
   return 0;
 }
