@@ -47,7 +47,7 @@ void loconet_tx_reset_current_message_to_queue(void)
   loconet_tx_current->tx_index = 0;
   loconet_tx_current->rx_index = 0;
   // Place message back at front of queue
-  loconet_tx_current->next = loconet_tx_current;
+  loconet_tx_current->next = loconet_tx_queue;
   loconet_tx_queue = loconet_tx_current;
   loconet_tx_current = 0;
 }
