@@ -19,8 +19,22 @@ void loconet_cv_prog_off_event_dummy(void)
 {
 }
 
+void loconet_cv_prog_task_dummy(uint8_t*, uint8_t);
+void loconet_cv_prog_task_dummy(uint8_t* data, uint8_t length)
+{
+  (void) data;
+  (void) length;
+}
+
+
 __attribute__ ((weak, alias ("loconet_cv_prog_off_event_dummy"))) \
   void loconet_cv_prog_off_event(void);
+
+__attribute__ ((weak, alias ("loconet_cv_prog_off_event_dummy"))) \
+  void loconet_cv_prog_task_start(uint8_t*, uint8_t);
+
+__attribute__ ((weak, alias ("loconet_cv_prog_off_event_dummy"))) \
+  void loconet_cv_prog_task_final(uint8_t*, uint8_t);
 
 //-----------------------------------------------------------------------------
 uint8_t loconet_cv_write_allowed_dummy(uint16_t, uint16_t);
@@ -218,6 +232,51 @@ uint8_t loconet_cv_set(uint16_t lncv_number, uint16_t lncv_value)
 }
 
 //-----------------------------------------------------------------------------
+static void loconet_cv_fix_msb(uint8_t msb, uint8_t *data, uint8_t length)
+{
+  for (uint8_t index = 0; index < length; index++) {
+    *data++ |= ((msb & (1 << index)) << (length - index));
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Callback functions to hook unto the RX
+
+void loconet_cv_peer_xfer(uint8_t* data, uint8_t length)
+{
+  // Length 12 and source KPU, we take the message
+  if (length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
+    loconet_cv_fix_msb(data[4], &data[5], 7);
+    loconet_cv_process((LOCONET_CV_MSG_Type *)data, 0xE5);
+  }
+}
+
+void loconet_cv_imm_packet(uint8_t *data, uint8_t length)
+{
+  // Length 12 and source KPU, we take over the message
+  if (length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
+    loconet_cv_fix_msb(data[4], &data[5], 7);
+    loconet_cv_process((LOCONET_CV_MSG_Type *)data, 0xED);
+  }
+}
+
+void loconet_cv_wr_sl_data(uint8_t *data, uint8_t length) {
+  if (length > 0 && data[0] == 0x7C) {
+    // Program task start
+    loconet_cv_prog_task_start(&data[1], length - 1);
+    (void) length;
+  }
+}
+
+void loconet_cv_rd_sl_data(uint8_t *data, uint8_t length) {
+  if (length > 0 && data[0] == 0x7C) {
+    // Program task final
+    loconet_cv_prog_task_final(&data[1], length - 1);
+  }
+}
+
+
+//-----------------------------------------------------------------------------
 enum status_code loconet_cv_init(void)
 {
   // Check if Eeprom is initialized
@@ -232,6 +291,13 @@ enum status_code loconet_cv_init(void)
 
   // Disable programming on init
   loconet_cv_programming = false;
+
+
+  // Register callback function on RX
+  loconet_rx_register_callback(LOCONET_OPC_PEER_XFER, loconet_cv_peer_xfer);
+  loconet_rx_register_callback(LOCONET_OPC_IMM_PACKET, loconet_cv_imm_packet);
+  loconet_rx_register_callback(LOCONET_OPC_WR_SL_DATA, loconet_cv_wr_sl_data);
+  loconet_rx_register_callback(LOCONET_OPC_RD_SL_DATA, loconet_cv_rd_sl_data);
 
   return STATUS_OK;
 }

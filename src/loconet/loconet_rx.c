@@ -13,10 +13,9 @@
 
 //-----------------------------------------------------------------------------
 // Prototypes
-void loconet_rx_dummy_0(void);
-void loconet_rx_dummy_2(uint8_t, uint8_t);
-void loconet_rx_dummy_4(uint8_t, uint8_t, uint8_t, uint8_t);
-void loconet_rx_dummy_n(uint8_t*, uint8_t);
+// Internal function used to notify all listeners to some opcode
+void loconet_rx_notify(uint8_t opcode, uint8_t*, uint8_t);
+
 
 //-----------------------------------------------------------------------------
 // Define LOCONET_RX_RINGBUFFER_Size if it's not defined
@@ -47,265 +46,6 @@ void loconet_rx_buffer_push(uint8_t byte)
   // Write the byte
   loconet_rx_ringbuffer.buffer[loconet_rx_ringbuffer.writer] = byte;
   loconet_rx_ringbuffer.writer = index;
-}
-
-//-----------------------------------------------------------------------------
-#define LOCONET_RX_DUMMY_0(name) \
-  __attribute__ ((weak, alias ("loconet_rx_dummy_0"))) \
-  void loconet_rx_##name(void)
-#define LOCONET_RX_DUMMY_2(name) \
-  __attribute__ ((weak, alias ("loconet_rx_dummy_2"))) \
-  void loconet_rx_##name(uint8_t, uint8_t)
-#define LOCONET_RX_DUMMY_4(name) \
-  __attribute__ ((weak, alias ("loconet_rx_dummy_4"))) \
-  void loconet_rx_##name(uint8_t, uint8_t, uint8_t, uint8_t)
-#define LOCONET_RX_DUMMY_N(name) \
-  __attribute__ ((weak, alias ("loconet_rx_dummy_n"))) \
-  void loconet_rx_##name(uint8_t*, uint8_t)
-
-//-----------------------------------------------------------------------------
-LOCONET_RX_DUMMY_0(busy);
-LOCONET_RX_DUMMY_0(gpoff);
-LOCONET_RX_DUMMY_0(gpon);
-LOCONET_RX_DUMMY_0(idle);
-
-//-----------------------------------------------------------------------------
-LOCONET_RX_DUMMY_2(loco_spd);
-LOCONET_RX_DUMMY_2(loco_dirf);
-LOCONET_RX_DUMMY_2(loco_snd);
-LOCONET_RX_DUMMY_2(sw_req);
-LOCONET_RX_DUMMY_2(sw_rep);
-LOCONET_RX_DUMMY_2(input_rep);
-LOCONET_RX_DUMMY_2(long_ack);
-LOCONET_RX_DUMMY_2(slot_stat1);
-LOCONET_RX_DUMMY_2(consist_func);
-LOCONET_RX_DUMMY_2(unlink_slots);
-LOCONET_RX_DUMMY_2(link_slots);
-LOCONET_RX_DUMMY_2(move_slots);
-LOCONET_RX_DUMMY_2(rq_sl_data);
-LOCONET_RX_DUMMY_2(sw_state);
-LOCONET_RX_DUMMY_2(sw_ack);
-LOCONET_RX_DUMMY_2(loco_adr);
-
-//-----------------------------------------------------------------------------
-LOCONET_RX_DUMMY_N(wr_sl_data);
-LOCONET_RX_DUMMY_N(rd_sl_data);
-LOCONET_RX_DUMMY_N(peer_xfer);
-LOCONET_RX_DUMMY_N(imm_packet);
-LOCONET_RX_DUMMY_N(prog_task_start);
-LOCONET_RX_DUMMY_N(prog_task_final);
-LOCONET_RX_DUMMY_N(fast_clock);
-
-//-----------------------------------------------------------------------------
-// Special handlers which cannot be overriden
-static void loconet_rx_wr_sl_data_(uint8_t*, uint8_t);
-static void loconet_rx_rd_sl_data_(uint8_t*, uint8_t);
-static void loconet_rx_peer_xfer_(uint8_t*, uint8_t);
-static void loconet_rx_imm_packet_(uint8_t*, uint8_t);
-
-//-----------------------------------------------------------------------------
-void (* const ln_messages_0[32])(void) = {
-  loconet_rx_dummy_0,     // 0x80
-  loconet_rx_busy,        // 0x81
-  loconet_rx_gpoff,       // 0x82
-  loconet_rx_gpon,        // 0x83
-  loconet_rx_dummy_0,     // 0x84
-  loconet_rx_idle,        // 0x85
-  loconet_rx_dummy_0,     // 0x86
-  loconet_rx_dummy_0,     // 0x87
-  loconet_rx_dummy_0,     // 0x88
-  loconet_rx_dummy_0,     // 0x89
-  loconet_rx_dummy_0,     // 0x8A
-  loconet_rx_dummy_0,     // 0x8B
-  loconet_rx_dummy_0,     // 0x8C
-  loconet_rx_dummy_0,     // 0x8D
-  loconet_rx_dummy_0,     // 0x8E
-  loconet_rx_dummy_0,     // 0x8F
-  loconet_rx_dummy_0,     // 0x90
-  loconet_rx_dummy_0,     // 0x91
-  loconet_rx_dummy_0,     // 0x92
-  loconet_rx_dummy_0,     // 0x93
-  loconet_rx_dummy_0,     // 0x94
-  loconet_rx_dummy_0,     // 0x95
-  loconet_rx_dummy_0,     // 0x96
-  loconet_rx_dummy_0,     // 0x97
-  loconet_rx_dummy_0,     // 0x98
-  loconet_rx_dummy_0,     // 0x99
-  loconet_rx_dummy_0,     // 0x9A
-  loconet_rx_dummy_0,     // 0x9B
-  loconet_rx_dummy_0,     // 0x9C
-  loconet_rx_dummy_0,     // 0x9D
-  loconet_rx_dummy_0,     // 0x9E
-  loconet_rx_dummy_0,     // 0x9F
-};
-
-//-----------------------------------------------------------------------------
-void (* const ln_messages_2[32])(uint8_t, uint8_t) = {
-  loconet_rx_loco_spd,    // 0xA0
-  loconet_rx_loco_dirf,   // 0xA1
-  loconet_rx_loco_snd,    // 0xA2
-  loconet_rx_dummy_2,     // 0xA3
-  loconet_rx_dummy_2,     // 0xA4
-  loconet_rx_dummy_2,     // 0xA5
-  loconet_rx_dummy_2,     // 0xA6
-  loconet_rx_dummy_2,     // 0xA7
-  loconet_rx_dummy_2,     // 0xA8
-  loconet_rx_dummy_2,     // 0xA9
-  loconet_rx_dummy_2,     // 0xAA
-  loconet_rx_dummy_2,     // 0xAB
-  loconet_rx_dummy_2,     // 0xAC
-  loconet_rx_dummy_2,     // 0xAD
-  loconet_rx_dummy_2,     // 0xAE
-  loconet_rx_dummy_2,     // 0xAF
-  loconet_rx_sw_req,      // 0xB0
-  loconet_rx_sw_rep,      // 0xB1
-  loconet_rx_input_rep,   // 0xB2
-  loconet_rx_dummy_2,     // 0xB3
-  loconet_rx_long_ack,    // 0xB4
-  loconet_rx_slot_stat1,  // 0xB5
-  loconet_rx_consist_func,// 0xB6
-  loconet_rx_dummy_2,     // 0xB7
-  loconet_rx_unlink_slots,// 0xB8
-  loconet_rx_link_slots,  // 0xB9
-  loconet_rx_move_slots,  // 0xBA
-  loconet_rx_rq_sl_data,  // 0xBB
-  loconet_rx_sw_state,    // 0xBC
-  loconet_rx_sw_ack,      // 0xBD
-  loconet_rx_dummy_2,     // 0xBE
-  loconet_rx_loco_adr,    // 0xBF
-};
-
-//-----------------------------------------------------------------------------
-void (* const ln_messages_4[32])(uint8_t, uint8_t, uint8_t, uint8_t) = {
-  loconet_rx_dummy_4,     // 0xC0
-  loconet_rx_dummy_4,     // 0xC1
-  loconet_rx_dummy_4,     // 0xC2
-  loconet_rx_dummy_4,     // 0xC3
-  loconet_rx_dummy_4,     // 0xC4
-  loconet_rx_dummy_4,     // 0xC5
-  loconet_rx_dummy_4,     // 0xC6
-  loconet_rx_dummy_4,     // 0xC7
-  loconet_rx_dummy_4,     // 0xC8
-  loconet_rx_dummy_4,     // 0xC9
-  loconet_rx_dummy_4,     // 0xCA
-  loconet_rx_dummy_4,     // 0xCB
-  loconet_rx_dummy_4,     // 0xCC
-  loconet_rx_dummy_4,     // 0xCD
-  loconet_rx_dummy_4,     // 0xCE
-  loconet_rx_dummy_4,     // 0xCF
-  loconet_rx_dummy_4,     // 0xD0
-  loconet_rx_dummy_4,     // 0xD1
-  loconet_rx_dummy_4,     // 0xD2
-  loconet_rx_dummy_4,     // 0xD3
-  loconet_rx_dummy_4,     // 0xD4
-  loconet_rx_dummy_4,     // 0xD5
-  loconet_rx_dummy_4,     // 0xD6
-  loconet_rx_dummy_4,     // 0xD7
-  loconet_rx_dummy_4,     // 0xD8
-  loconet_rx_dummy_4,     // 0xD9
-  loconet_rx_dummy_4,     // 0xDA
-  loconet_rx_dummy_4,     // 0xDB
-  loconet_rx_dummy_4,     // 0xDC
-  loconet_rx_dummy_4,     // 0xDD
-  loconet_rx_dummy_4,     // 0xDE
-  loconet_rx_dummy_4,     // 0xDF
-};
-
-//-----------------------------------------------------------------------------
-void (* const ln_messages_n[32])(uint8_t*, uint8_t) = {
-  loconet_rx_dummy_n,     // 0xE0
-  loconet_rx_dummy_n,     // 0xE1
-  loconet_rx_dummy_n,     // 0xE2
-  loconet_rx_dummy_n,     // 0xE3
-  loconet_rx_dummy_n,     // 0xE4
-  loconet_rx_peer_xfer_,  // 0xE5
-  loconet_rx_dummy_n,     // 0xE6
-  loconet_rx_rd_sl_data_, // 0xE7
-  loconet_rx_dummy_n,     // 0xE8
-  loconet_rx_dummy_n,     // 0xE9
-  loconet_rx_dummy_n,     // 0xEA
-  loconet_rx_dummy_n,     // 0xEB
-  loconet_rx_dummy_n,     // 0xEC
-  loconet_rx_imm_packet_, // 0xED
-  loconet_rx_dummy_n,     // 0xEE
-  loconet_rx_wr_sl_data_, // 0xEF
-  loconet_rx_dummy_n,     // 0xF0
-  loconet_rx_dummy_n,     // 0xF1
-  loconet_rx_dummy_n,     // 0xF2
-  loconet_rx_dummy_n,     // 0xF3
-  loconet_rx_dummy_n,     // 0xF4
-  loconet_rx_dummy_n,     // 0xF5
-  loconet_rx_dummy_n,     // 0xF6
-  loconet_rx_dummy_n,     // 0xF7
-  loconet_rx_dummy_n,     // 0xF8
-  loconet_rx_dummy_n,     // 0xF9
-  loconet_rx_dummy_n,     // 0xFA
-  loconet_rx_dummy_n,     // 0xFB
-  loconet_rx_dummy_n,     // 0xFC
-  loconet_rx_dummy_n,     // 0xFD
-  loconet_rx_dummy_n,     // 0xFE
-  loconet_rx_dummy_n,     // 0xFF
-};
-
-//-----------------------------------------------------------------------------
-// Read slot data (SL_RD_DATA)
-// Handle special cases
-static void loconet_rx_rd_sl_data_(uint8_t *data, uint8_t length) {
-  if (data[0] == 0x7C) { // Program task final
-    loconet_rx_prog_task_final(&data[1], length - 1);
-  } else { // Default handler
-    loconet_rx_rd_sl_data(data, length);
-  }
-}
-
-//-----------------------------------------------------------------------------
-// Write slot data (RW_SL_DATA)
-// Handle special cases
-static void loconet_rx_wr_sl_data_(uint8_t *data, uint8_t length) {
-  if (data[0] == 0x7B) { // Fast clock
-    loconet_rx_fast_clock(&data[1], length - 1);
-  } else if (data[0] == 0x7C) { // Program task start
-    loconet_rx_prog_task_start(&data[1], length - 1);
-  } else { // Default handler
-    loconet_rx_wr_sl_data(data, length);
-  }
-}
-
-//-----------------------------------------------------------------------------
-// Fix most significant bits for LNCV messages from an IntelliBox
-static void loconet_fix_msb(uint8_t msb, uint8_t *data, uint8_t length)
-{
-  for (uint8_t index = 0; index < length; index++) {
-    *data++ |= ((msb & (1 << index)) << (length - index));
-  }
-}
-
-//-----------------------------------------------------------------------------
-// Peer to peer transfer
-// Handle special cases
-static void loconet_rx_peer_xfer_(uint8_t *data, uint8_t length) {
-  // Length 12 and source KPU, we take over the message
-  if (length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
-    loconet_fix_msb(data[4], &data[5], 7);
-    loconet_cv_process((LOCONET_CV_MSG_Type *)data, 0xE5);
-  } else {
-    // Call normal function
-    loconet_rx_peer_xfer(data, length);
-  }
-}
-
-//-----------------------------------------------------------------------------
-// IMM Packet
-// Handle special cases
-static void loconet_rx_imm_packet_(uint8_t *data, uint8_t length) {
-  // Length 12 and source KPU, we take over the message
-  if (length == 0x0C && data[0] == LOCONET_CV_SRC_KPU) {
-    loconet_fix_msb(data[4], &data[5], 7);
-    loconet_cv_process((LOCONET_CV_MSG_Type *)data, 0xED);
-  } else {
-    // Call normal function
-    loconet_rx_imm_packet(data, length);
-  }
 }
 
 //-----------------------------------------------------------------------------
@@ -396,20 +136,11 @@ uint8_t loconet_rx_process(void)
     return 0;
   }
 
-  // Handle message
-  switch(opcode.bits.OPCODE) {
-    case 0x04: // Length 0
-      (*ln_messages_0[opcode.bits.NUMBER])();
-      break;
-    case 0x05: // Length 2
-      (*ln_messages_2[opcode.bits.NUMBER])(data[1], data[2]);
-      break;
-    case 0x06: // Length 4
-      (*ln_messages_4[opcode.bits.NUMBER])(data[1], data[2], data[3], data[4]);
-      break;
-    case 0x07: // Variable length
-      (*ln_messages_n[opcode.bits.NUMBER])(&data[2], message_size - 3);
-      break;
+  // Call notifier, but first check whether the OPCODE is of variable length
+  if (opcode.bits.OPCODE == 0x07) {
+    loconet_rx_notify(opcode.bits.NUMBER, &data[2], message_size - 3);
+  } else {
+    loconet_rx_notify(opcode.bits.NUMBER, &data[1], message_size - 2);
   }
 
   // Advance reader
@@ -420,27 +151,80 @@ uint8_t loconet_rx_process(void)
 }
 
 //-----------------------------------------------------------------------------
-// Dummy handlers
-void loconet_rx_dummy_0(void)
+// Observer pattern for reacting on incoming messages, based on their OPCODE.
+
+// Implemented using a linked list
+typedef struct LOCONET_RX_OBSERVERITEM {
+  // Opcode to register for
+  uint8_t opcode;
+  // Callback function
+  void (*callback)(uint8_t*, uint8_t);
+  // Next list item
+  struct LOCONET_RX_OBSERVERITEM *next;
+} LOCONET_RX_OBSERVERITEM_Type;
+
+// The first element in the linked list of observers
+LOCONET_RX_OBSERVERITEM_Type *loconet_rx_observer_list_first = 0;
+// The last element of the list
+LOCONET_RX_OBSERVERITEM_Type *loconet_rx_observer_list_last = 0;
+
+// Size of the linked list
+uint8_t loconet_rx_observer_listsize = 0;
+
+void loconet_rx_register_callback(uint8_t opcode, void (*callback)(uint8_t*, uint8_t))
 {
+  LOCONET_RX_OBSERVERITEM_Type *item = malloc(sizeof(LOCONET_RX_OBSERVERITEM_Type));
+  memset(item, 0, sizeof(LOCONET_RX_OBSERVERITEM_Type));
+
+  item->opcode = opcode;
+  item->callback = callback;
+
+  if (loconet_rx_observer_listsize == 0) {
+    loconet_rx_observer_list_first = item;
+  } else {
+    loconet_rx_observer_list_last->next = item;
+  }
+  loconet_rx_observer_list_last = item;
+
+  loconet_rx_observer_listsize++;
 }
 
-void loconet_rx_dummy_2(uint8_t a, uint8_t b)
+void loconet_rx_unregister_callback(uint8_t opcode, void (*callback)(uint8_t*, uint8_t))
 {
-  (void)a;
-  (void)b;
+  LOCONET_RX_OBSERVERITEM_Type *cur = loconet_rx_observer_list_first;
+  LOCONET_RX_OBSERVERITEM_Type *prev = 0;
+
+  // Iterate the linked list, and remove all elements that are similar
+  while(cur) {
+    if (cur->opcode == opcode &&  cur->callback == callback) {
+      // Remove item
+      LOCONET_RX_OBSERVERITEM_Type *del = cur;
+      if (prev) {
+        prev->next = cur->next;
+      } else {
+        loconet_rx_observer_list_first = cur->next;
+      }
+      free(del);
+      cur = prev;
+      loconet_rx_observer_listsize--;
+    } // End remove item
+    prev = cur;
+    cur = cur->next;
+  }
 }
 
-void loconet_rx_dummy_4(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
+void loconet_rx_notify(uint8_t opcode, uint8_t* arr, uint8_t size)
 {
-  (void)a;
-  (void)b;
-  (void)c;
-  (void)d;
-}
+  if (loconet_rx_observer_listsize == 0) {
+    return;
+  }
 
-void loconet_rx_dummy_n(uint8_t *d, uint8_t l)
-{
-  (void)d;
-  (void)l;
+  LOCONET_RX_OBSERVERITEM_Type *cur = loconet_rx_observer_list_first;
+
+  while(cur) {
+    if (cur->opcode == opcode) {
+      cur->callback(arr, size);
+    }
+    cur = cur->next;
+  }
 }

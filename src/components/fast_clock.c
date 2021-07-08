@@ -124,20 +124,25 @@ void fast_clock_set_rate(uint8_t rate)
 
 //----------------------------------------------------------------------------
 // This function processes the clock information sent on the loconet
-void loconet_rx_fast_clock(uint8_t *data, uint8_t length)
+void fast_clock_get_update(uint8_t *data, uint8_t length)
 {
-  if (length < 8)
+  // Check if the first byte is indeed the code for the fastclock
+  if (data[0] != 0x7B) {
+    return;
+  }
+
+  if (length < 9)
   {
     return;
   }
 
-  if (data[7] != 1) {
+  if (data[8] != 1) {
     // The message is not a correct clock tick!
     return;
   }
 
   // 1st byte of data is the clock rate
-  fast_clock_set_rate(data[0]);
+  fast_clock_set_rate(data[1]);
 
   // We first reset the second and millisecond counters, as we restart
   // counting
@@ -145,9 +150,9 @@ void loconet_rx_fast_clock(uint8_t *data, uint8_t length)
   current_time.second = 0;
 
   // Update current time according to the message
-  current_time.minute = data[3] - (128 - 60);
-  current_time.hour = data[5] >= (128 - 24) ? data[5] - (128-24) : data[5] % 24;
-  current_time.day = data[6] % 7;
+  current_time.minute = data[4] - (128 - 60);
+  current_time.hour = data[6] >= (128 - 24) ? data[6] - (128-24) : data[6] % 24;
+  current_time.day = data[7] % 7;
 
   // Notify the update
   fast_clock_handle_update(current_time);
@@ -260,6 +265,12 @@ uint16_t fast_clock_get_time_as_int(void)
 void fast_clock_handle_update_dummy(FAST_CLOCK_TIME_Type time)
 {
   (void) time;
+}
+
+void fast_clock_init()
+{
+  fast_clock_init_hw();
+  loconet_rx_register_callback(LOCONET_OPC_RW_SL_DATA, fast_clock_get_update);
 }
 
 #endif // COMPONENTS_FAST_CLOCK
